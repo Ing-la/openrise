@@ -1,0 +1,59 @@
+services:
+  # 1. 数据库：持久化存储
+  db:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-openrise}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-openrise_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-openrise}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-openrise} -d ${POSTGRES_DB:-openrise}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. 前端：Next.js（含 API Routes）
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-openrise}:${POSTGRES_PASSWORD:-openrise_secret}@db:5432/${POSTGRES_DB:-openrise}
+      NODE_ENV: production
+      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-change-me-in-production}
+      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      RESEND_FROM: ${RESEND_FROM:-OpenRise <onboarding@resend.dev>}
+    volumes:
+      - uploads_data:/app/public/uploads
+    networks:
+      - app-network
+
+  # 3. Nginx：反向代理
+  nginx:
+    image: nginx:stable-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db_data:
+  uploads_data:

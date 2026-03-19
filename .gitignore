@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# AI / Agent 相关（不提交）
+.agent/
+.agents/
+.claude/
+*skill*
+skills-lock.json
+
+# docs 下部分文件夹（不提交）
+docs/plans/
+docs/resource/
