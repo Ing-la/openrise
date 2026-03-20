@@ -1,6 +1,7 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// 构建时可能无 env，传占位符避免 Resend 构造函数报错；运行时由 docker-compose 注入真实值
+const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
 
 const FROM = process.env.RESEND_FROM ?? "OpenRise <onboarding@resend.dev>";
 

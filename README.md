@@ -63,7 +63,7 @@ docker-compose up -d --build
 # 访问 http://localhost
 ```
 
-详见 [docs/3-三容器部署说明.md](docs/3-三容器部署说明.md)
+详见 [docs/部署指南.md](docs/部署指南.md)
 
 ## 项目结构
 

@@ -6,6 +6,9 @@ WORKDIR /app
 # 复制依赖文件
 COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
 
+# 复制 Prisma schema（postinstall 会执行 prisma generate，需先有 schema）
+COPY prisma ./prisma
+
 # 安装依赖（兼容 npm/yarn/pnpm）
 RUN npm install
 
@@ -32,9 +35,8 @@ COPY --from=builder /app/public ./public
 RUN mkdir -p ./public/uploads/avatar ./public/uploads/cover
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+# Prisma migrate 需完整 CLI 及依赖链，复制 node_modules（镜像略大但可靠）
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 
 USER nextjs
