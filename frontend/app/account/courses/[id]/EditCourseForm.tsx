@@ -36,9 +36,20 @@ export default function EditCourseForm({
         method: "POST",
         body: formData,
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data: { url?: string; error?: string };
+      try {
+        data = JSON.parse(text);
+      } catch {
+        // 返回了 HTML 等非 JSON（常见于代理 404/502、Nginx 413 等）
+        const hint =
+          res.status === 413
+            ? "文件过大，请压缩后重试"
+            : `请求异常 (${res.status})，请检查服务器 Nginx 与容器日志`;
+        throw new Error(hint);
+      }
       if (!res.ok) throw new Error(data.error ?? "上传失败");
-      setCoverImageUrl(data.url);
+      if (data.url) setCoverImageUrl(data.url);
     } catch (err) {
       setError(err instanceof Error ? err.message : "上传失败");
     } finally {

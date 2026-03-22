@@ -65,10 +65,10 @@ export const COURSES: Course[] = [
       },
     ],
     instructor: {
-      name: "柴涛",
-      role: "产品 & 设计总监",
-      bio: "柴涛专注于 AI 应用教育，帮助普通人通过实践掌握 AI 能力。",
-      img: "/images/chaitao.png",
+      name: "产品负责人",
+      role: "产品 & 设计",
+      bio: "专注于 AI 应用教育，帮助普通人通过实践掌握 AI 能力。",
+      img: "/images/founder-david.jpg",
     },
   },
   {
@@ -81,10 +81,10 @@ export const COURSES: Course[] = [
     img: "/images/course-generative-design.jpg",
     alt: "Symmetric fractal art with deep blue and purple hues",
     instructor: {
-      name: "杨泽毓",
+      name: "技术负责人",
       role: "技术 & 运营",
-      bio: "杨泽毓专注于技术实现与运营。",
-      img: "/images/yangzheyu.jpg",
+      bio: "专注于技术实现与运营。",
+      img: "/images/founder-elena.jpg",
     },
   },
   {
@@ -97,10 +97,10 @@ export const COURSES: Course[] = [
     img: "/images/course-llm-engineering.jpg",
     alt: "Source code on a screen with blue syntax highlighting",
     instructor: {
-      name: "张伟",
+      name: "运营负责人",
       role: "开发 & 助理",
-      bio: "张伟专注于 AI 应用研究与开发。",
-      img: "/images/zhangwei.jpg",
+      bio: "专注于 AI 应用研究与开发。",
+      img: "/images/founder-jameson.jpg",
     },
   },
 ];
@@ -115,10 +115,10 @@ export const COURSES_CATALOG: Course[] = [
     img: "/images/course-neural-network.jpg",
     alt: "Futuristic neural network visualization in neon colors",
     instructor: {
-      name: "柴涛",
-      role: "产品 & 设计总监",
-      bio: "柴涛专注于 AI 应用教育，帮助普通人通过实践掌握 AI 能力。",
-      img: "/images/chaitao.png",
+      name: "产品负责人",
+      role: "产品 & 设计",
+      bio: "专注于 AI 应用教育，帮助普通人通过实践掌握 AI 能力。",
+      img: "/images/founder-david.jpg",
     },
   },
   {

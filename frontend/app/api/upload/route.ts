@@ -5,12 +5,11 @@ import { join } from "path";
 import { authOptions } from "@/lib/auth";
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "请先登录" }, { status: 401 });
-  }
-
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "请先登录" }, { status: 401 });
+    }
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const type = (formData.get("type") as string) || "avatar"; // avatar | cover
@@ -45,6 +44,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ url });
   } catch (e) {
     console.error("Upload error:", e);
-    return NextResponse.json({ error: "上传失败" }, { status: 500 });
+    return NextResponse.json(
+      { error: "上传失败，请检查服务器日志" },
+      { status: 500 }
+    );
   }
 }

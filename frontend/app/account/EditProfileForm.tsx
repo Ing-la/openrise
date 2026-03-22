@@ -33,9 +33,19 @@ export default function EditProfileForm({
         method: "POST",
         body: formData,
       });
-      const data = await res.json();
+      const text = await res.text();
+      let data: { url?: string; error?: string };
+      try {
+        data = JSON.parse(text);
+      } catch {
+        const hint =
+          res.status === 413
+            ? "文件过大，请压缩后重试"
+            : `请求异常 (${res.status})，请检查服务器 Nginx 与容器日志`;
+        throw new Error(hint);
+      }
       if (!res.ok) throw new Error(data.error ?? "上传失败");
-      setAvatarUrl(data.url);
+      if (data.url) setAvatarUrl(data.url);
     } catch (err) {
       setError(err instanceof Error ? err.message : "上传失败");
     } finally {

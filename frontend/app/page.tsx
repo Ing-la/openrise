@@ -44,22 +44,22 @@ const TESTIMONIALS = [
 
 const FOUNDERS = [
   {
-    name: "柴涛",
-    role: "产品 & 设计总监",
-    img: "/images/chaitao.png",
-    alt: "柴涛头像",
+    name: "产品负责人",
+    role: "产品 & 设计",
+    img: "/images/founder-david.jpg",
+    alt: "团队成员头像",
   },
   {
-    name: "杨泽毓",
+    name: "技术负责人",
     role: "技术 & 运营",
-    img: "/images/yangzheyu.jpg",
-    alt: "杨泽毓头像",
+    img: "/images/founder-elena.jpg",
+    alt: "团队成员头像",
   },
   {
-    name: "张伟",
+    name: "运营负责人",
     role: "开发 & 助理",
-    img: "/images/zhangwei.jpg",
-    alt: "张伟头像",
+    img: "/images/founder-jameson.jpg",
+    alt: "团队成员头像",
   },
 ].map((f) => ({ ...f, objectPosition: "center 35%" as const }));
 
