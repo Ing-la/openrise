@@ -104,6 +104,7 @@ export default async function AccountPage() {
                       alt={course.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform"
+                      unoptimized={course.coverImageUrl?.startsWith('/uploads/')}
                     />
                   </div>
                 ) : (

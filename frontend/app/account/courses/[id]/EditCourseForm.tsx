@@ -89,6 +89,7 @@ export default function EditCourseForm({
           {course.coverImageUrl ? (
             <Image
               src={course.coverImageUrl}
+              unoptimized={course.coverImageUrl?.startsWith('/uploads/')}
               alt={course.title}
               fill
               className="object-cover"
@@ -135,7 +136,7 @@ export default function EditCourseForm({
                 <div className="flex items-center gap-4">
                   <div className="relative size-24 overflow-hidden rounded-lg border bg-slate-100">
                     {coverImageUrl ? (
-                      <Image src={coverImageUrl} alt="" fill className="object-cover" />
+                      <Image src={coverImageUrl} alt="" fill className="object-cover" unoptimized={coverImageUrl?.startsWith('/uploads/')} />
                     ) : (
                       <span className="flex size-full items-center justify-center text-2xl text-slate-400">
                         <span className="material-symbols-outlined">image</span>

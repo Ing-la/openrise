@@ -157,6 +157,7 @@ export default function CoursesListPage() {
                       width={400}
                       height={225}
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      unoptimized={course.img?.startsWith('/uploads/')}
                     />
                   </div>
                   {course.topic && (

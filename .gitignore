@@ -30,3 +30,4 @@ skills-lock.json
 # docs 下部分文件夹（不提交）
 docs/plans/
 docs/resource/
+*.tar.gz

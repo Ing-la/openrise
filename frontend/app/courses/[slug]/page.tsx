@@ -260,6 +260,7 @@ export default async function CourseDetailPage({
             <div className="relative aspect-video overflow-hidden rounded-[2rem] border-8 border-white bg-slate-200 shadow-2xl lg:aspect-square">
               <Image
                 src={course.img}
+                unoptimized={course.img?.startsWith('/uploads/')}
                 alt={course.alt}
                 fill
                 className="object-cover"
@@ -324,6 +325,7 @@ export default async function CourseDetailPage({
                       width={128}
                       height={128}
                       className="size-32 rounded-full border-4 border-white object-cover"
+                      unoptimized={course.instructor.img?.startsWith('/uploads/')}
                     />
                   </div>
                   <div className="mt-4">

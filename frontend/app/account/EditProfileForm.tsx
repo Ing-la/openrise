@@ -82,6 +82,7 @@ export default function EditProfileForm({
             {user?.avatarUrl ? (
               <Image
                 src={user.avatarUrl}
+                unoptimized={user.avatarUrl?.startsWith('/uploads/')}
                 alt="头像"
                 fill
                 className="object-cover"
@@ -130,6 +131,7 @@ export default function EditProfileForm({
                     {avatarUrl ? (
                       <Image
                         src={avatarUrl}
+                        unoptimized={avatarUrl?.startsWith('/uploads/')}
                         alt=""
                         fill
                         className="object-cover"

@@ -38,12 +38,17 @@ COPY --from=builder /app/.next/static ./.next/static
 # Prisma migrate 需完整 CLI 及依赖链，复制 node_modules（镜像略大但可靠）
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
+# .next 需可写（Next.js 运行时会创建 .next/cache）
+RUN chown -R nextjs:nodejs /app/.next
+# entrypoint 需 root 执行 chown uploads，随后 su 到 nextjs 运行应用
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-USER nextjs
+USER root
 
 EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
+ENTRYPOINT ["/entrypoint.sh"]
