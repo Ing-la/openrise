@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 import AuthButton from "@/components/AuthButton";
 import CollapsibleChapter from "@/components/CollapsibleChapter";
 import { getCourseBySlug, COURSES, COURSES_CATALOG } from "@/lib/courses";
-import { prisma } from "@/lib/prisma";
+import { CourseService } from "@/lib/services/course-service";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import type { Course } from "@/lib/courses";
@@ -28,10 +28,8 @@ export async function generateMetadata({
   const { slug } = await params;
   const course = getCourseBySlug(slug);
   if (!course) {
-    const dbCourse = await prisma.course.findUnique({
-      where: { id: slug },
-      select: { title: true, description: true },
-    });
+    // 使用CourseService获取课程详情，不传userId以获取公开信息
+    const dbCourse = await CourseService.getCourseDetail(slug);
     if (!dbCourse) return { title: "案例未找到" };
     return {
       title: `${dbCourse.title} | OpenRise`,
@@ -45,49 +43,39 @@ export async function generateMetadata({
 }
 
 type CourseWithMeta = Course & { isUserCourse?: boolean };
-type SyllabusLessonWithId = { title: string; duration: string; id?: string; type?: string };
 
 async function getDbCourse(slug: string): Promise<CourseWithMeta | null> {
-  const dbCourse = await prisma.course.findUnique({
-    where: { id: slug },
-    include: {
-      user: { select: { name: true, avatarUrl: true, role: true, bio: true } },
-      chapters: {
-        orderBy: { sortOrder: "asc" },
-        include: { lessons: { orderBy: { sortOrder: "asc" } } },
-      },
-    },
-  });
+  // 使用CourseService获取课程详情，不传userId以获取公开信息
+  const dbCourse = await CourseService.getCourseDetail(slug);
   if (!dbCourse) return null;
-  const syllabus: { title: string; lessonCount: number; lessons: SyllabusLessonWithId[] }[] =
-    dbCourse.chapters.map((ch) => ({
-      title: ch.title,
-      lessonCount: ch.lessons.length,
-      lessons: ch.lessons.map((l) => ({
-        title: l.title,
-        duration: "-",
-        id: l.id,
-        type: l.type ?? "video",
-      })),
-    }));
-  const lessonCount = dbCourse.chapters.reduce((s, ch) => s + ch.lessons.length, 0);
+
+  // 转换为CourseWithMeta格式以兼容现有代码
   return {
-    slug: dbCourse.id,
+    slug: dbCourse.slug,
     title: dbCourse.title,
     desc: dbCourse.description ?? "",
     fullDesc: dbCourse.description ?? undefined,
     img: dbCourse.coverImageUrl ?? "/images/logo.jpg",
     alt: dbCourse.title,
     topic: "用户创作",
-    lessons: lessonCount,
-    syllabus,
+    lessons: dbCourse.lessonCount,
+    syllabus: dbCourse.syllabus.map(module => ({
+      title: module.title,
+      lessonCount: module.lessonCount,
+      lessons: module.lessons.map(lesson => ({
+        title: lesson.title,
+        duration: lesson.duration ?? "-",
+        id: lesson.id,
+        type: lesson.type,
+      })),
+    })),
     isUserCourse: true,
-    instructor: dbCourse.user
+    instructor: dbCourse.instructor
       ? {
-          name: dbCourse.user.name ?? "匿名",
-          role: dbCourse.user.role ?? "",
-          bio: dbCourse.user.bio ?? "",
-          img: dbCourse.user.avatarUrl ?? "/images/logo.jpg",
+          name: dbCourse.instructor.name,
+          role: dbCourse.instructor.role ?? "",
+          bio: dbCourse.instructor.bio ?? "",
+          img: dbCourse.instructor.avatarUrl ?? "/images/logo.jpg",
         }
       : undefined,
   };
@@ -99,22 +87,18 @@ export default async function CourseDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  let course: CourseWithMeta | undefined =
+  const course: CourseWithMeta | undefined =
     (getCourseBySlug(slug) as CourseWithMeta | undefined) ?? (await getDbCourse(slug)) ?? undefined;
   if (!course) notFound();
 
   const session = await getServerSession(authOptions);
-  const isOwner =
-    course.isUserCourse &&
-    session?.user?.id &&
-    (await prisma.course.findFirst({ where: { id: course.slug, userId: session.user.id } })) != null;
+  const isOwner = course.isUserCourse && session?.user?.id
+    ? await CourseService.isCourseOwner(course.slug, session.user.id)
+    : false;
 
-  const firstLessonId =
-    course.isUserCourse &&
-    course.syllabus?.[0]?.lessons?.[0] &&
-    "id" in course.syllabus[0].lessons[0]
-      ? (course.syllabus[0].lessons[0] as SyllabusLessonWithId).id
-      : undefined;
+  const firstLessonId = course.isUserCourse
+    ? await CourseService.getFirstLessonId(course.slug, session?.user?.id)
+    : undefined;
 
   return (
     <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#FAFAFA]">
@@ -208,7 +192,7 @@ export default async function CourseDetailPage({
             <div className="mt-2 flex flex-col gap-4 sm:flex-row">
               {course.isUserCourse && firstLessonId ? (
                 <Link
-                  href={`/account/lessons/${firstLessonId}`}
+                  href={`/courses/${course.slug}/lessons/${firstLessonId}`}
                   className="rounded-xl bg-primary px-8 py-4 text-center text-lg font-bold text-white shadow-lg shadow-primary/10 transition-all hover:bg-emerald-900"
                 >
                   开始学习
@@ -293,6 +277,7 @@ export default async function CourseDetailPage({
                       lessons={module.lessons}
                       defaultOpen={i === 0}
                       isUserCourse={!!course.isUserCourse}
+                      courseSlug={course.slug}
                     />
                   ))}
                 </div>

@@ -12,6 +12,7 @@ export default function CollapsibleChapter({
   lessons,
   defaultOpen,
   isUserCourse = false,
+  courseSlug,
 }: {
   index: number;
   title: string;
@@ -19,6 +20,7 @@ export default function CollapsibleChapter({
   lessons: Lesson[];
   defaultOpen: boolean;
   isUserCourse?: boolean;
+  courseSlug?: string;
 }) {
   const [open, setOpen] = useState(defaultOpen);
 
@@ -71,7 +73,7 @@ export default function CollapsibleChapter({
               return canLink && lesson.id ? (
                 <Link
                   key={lesson.id}
-                  href={`/account/lessons/${lesson.id}`}
+                  href={courseSlug ? `/courses/${courseSlug}/lessons/${lesson.id}` : `/courses/lessons/${lesson.id}`}
                   className="group/item flex items-center justify-between rounded-xl border border-transparent p-4 transition-colors hover:border-accent-sage/20 hover:bg-accent-sage/5"
                 >
                   {content}

@@ -161,7 +161,7 @@ export default function ChapterList({
                   </p>
                 ) : (
                   <div className="space-y-2">
-                    {chapter.lessons.map((lesson, j) => (
+                    {chapter.lessons.map((lesson, _j) => (
                       <Link
                         key={lesson.id}
                         href={`/account/lessons/${lesson.id}`}

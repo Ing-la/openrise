@@ -23,9 +23,10 @@ export default function RegisterPage() {
   }, []);
 
   useEffect(() => {
-    (window as any).onTurnstileSuccess = onTurnstileVerify;
+    const win = window as { onTurnstileSuccess?: (token: string) => void };
+    win.onTurnstileSuccess = onTurnstileVerify;
     return () => {
-      delete (window as any).onTurnstileSuccess;
+      delete win.onTurnstileSuccess;
     };
   }, [onTurnstileVerify]);
 

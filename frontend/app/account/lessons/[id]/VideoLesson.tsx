@@ -5,7 +5,7 @@ import { parseVideoUrl } from "@/lib/video";
 
 export default function VideoLesson({
   url,
-  platform,
+  platform: _platform,
 }: {
   url: string;
   platform: string;
