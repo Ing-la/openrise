@@ -28,6 +28,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      minio:
+        condition: service_started
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-openrise}:${POSTGRES_PASSWORD:-openrise_secret}@db:5432/${POSTGRES_DB:-openrise}
       NODE_ENV: production
@@ -38,8 +40,15 @@ services:
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
       TELEGRAM_PROXY: ${TELEGRAM_PROXY:-}
-    volumes:
-      - uploads_data:/app/public/uploads
+      RUN_SEED: ${RUN_SEED:-false}
+      # MinIO 对象存储配置
+      MINIO_ENDPOINT: ${MINIO_ENDPOINT:-http://minio:9000}
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-${MINIO_ROOT_USER:-minioadmin}}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-${MINIO_ROOT_PASSWORD:-minioadmin}}
+      MINIO_BUCKET: ${MINIO_BUCKET:-uploads}
+      MINIO_REGION: ${MINIO_REGION:-}
+      MINIO_USE_SSL: ${MINIO_USE_SSL:-false}
+    user: "1001:1001"  # 明确指定容器运行时用户（nextjs:nodejs）
     networks:
       - app-network
 
@@ -55,10 +64,32 @@ services:
     networks:
       - app-network
 
+  # 4. MinIO：对象存储（替代本地文件上传）
+  minio:
+    image: minio/minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"  # S3 API端口
+      - "9001:9001"  # 管理控制台
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - minio_data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+
 networks:
   app-network:
     driver: bridge
 
 volumes:
   db_data:
-  uploads_data:
+  minio_data:
+

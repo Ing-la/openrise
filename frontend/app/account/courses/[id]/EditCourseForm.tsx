@@ -11,6 +11,7 @@ export default function EditCourseForm({
     title: string;
     description: string | null;
     coverImageUrl: string | null;
+    isPublic: boolean;
     user?: { name: string | null };
   };
 }) {
@@ -19,6 +20,7 @@ export default function EditCourseForm({
   const [title, setTitle] = useState(course.title);
   const [description, setDescription] = useState(course.description ?? "");
   const [coverImageUrl, setCoverImageUrl] = useState(course.coverImageUrl ?? "");
+  const [isPublic, setIsPublic] = useState(course.isPublic);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,29 +31,58 @@ export default function EditCourseForm({
     setUploading(true);
     setError("");
     try {
+      console.log("开始上传封面文件:", {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        lastModified: file.lastModified
+      });
+
       const formData = new FormData();
       formData.set("file", file);
       formData.set("type", "cover");
+
+      console.log("调用上传API...");
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
+
       const text = await res.text();
+      console.log("上传API响应状态:", res.status, "响应文本:", text);
+
       let data: { url?: string; error?: string };
       try {
         data = JSON.parse(text);
+        console.log("解析的响应数据:", data);
       } catch {
-        // 返回了 HTML 等非 JSON（常见于代理 404/502、Nginx 413 等）
+        console.error("无法解析JSON响应:", text);
         const hint =
           res.status === 413
             ? "文件过大，请压缩后重试"
             : `请求异常 (${res.status})，请检查服务器 Nginx 与容器日志`;
         throw new Error(hint);
       }
-      if (!res.ok) throw new Error(data.error ?? "上传失败");
-      if (data.url) setCoverImageUrl(data.url);
+
+      if (!res.ok) {
+        console.error("上传失败，错误:", data.error);
+        throw new Error(data.error ?? "上传失败");
+      }
+
+      if (data.url) {
+        console.log("上传成功，设置coverImageUrl为:", data.url);
+        setCoverImageUrl(data.url);
+
+        // 记录图片URL用于调试
+        console.log("图片URL:", data.url);
+      } else {
+        console.error("响应中没有URL字段");
+        throw new Error("服务器响应异常，未返回文件URL");
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "上传失败");
+      const errorMsg = err instanceof Error ? err.message : "上传失败";
+      console.error("封面上传错误:", errorMsg, err);
+      setError(errorMsg);
     } finally {
       setUploading(false);
     }
@@ -69,6 +100,7 @@ export default function EditCourseForm({
           title,
           description: description || undefined,
           coverImageUrl: coverImageUrl || undefined,
+          isPublic,
         }),
       });
       const data = await res.json();
@@ -89,7 +121,7 @@ export default function EditCourseForm({
           {course.coverImageUrl ? (
             <Image
               src={course.coverImageUrl}
-              unoptimized={course.coverImageUrl?.startsWith('/uploads/')}
+              unoptimized={course.coverImageUrl?.indexOf('/uploads/') === 0}
               alt={course.title}
               fill
               className="object-cover"
@@ -136,7 +168,7 @@ export default function EditCourseForm({
                 <div className="flex items-center gap-4">
                   <div className="relative size-24 overflow-hidden rounded-lg border bg-slate-100">
                     {coverImageUrl ? (
-                      <Image src={coverImageUrl} alt="" fill className="object-cover" unoptimized={coverImageUrl?.startsWith('/uploads/')} />
+                      <Image src={coverImageUrl} alt="" fill className="object-cover" unoptimized={coverImageUrl?.indexOf('/uploads/') === 0} />
                     ) : (
                       <span className="flex size-full items-center justify-center text-2xl text-slate-400">
                         <span className="material-symbols-outlined">image</span>
@@ -172,6 +204,26 @@ export default function EditCourseForm({
                   rows={3}
                   className="rounded-lg border border-slate-200 px-4 py-3"
                 />
+              </label>
+
+              <label className="flex items-center justify-between gap-4">
+                <span className="text-sm font-medium text-slate-700">课程可见性</span>
+                <button
+                  type="button"
+                  onClick={() => setIsPublic(!isPublic)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    isPublic ? "bg-primary" : "bg-slate-300"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isPublic ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+                <span className="text-sm text-slate-500">
+                  {isPublic ? "公开（所有人可见）" : "私有（仅自己可见）"}
+                </span>
               </label>
 
               <div className="flex gap-3 pt-2">

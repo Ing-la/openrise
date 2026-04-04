@@ -12,6 +12,7 @@ export default function CreateCourseForm({ variant = "default" }: CreateCourseFo
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [isPublic, setIsPublic] = useState(true); // 默认公开
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -24,7 +25,11 @@ export default function CreateCourseForm({ variant = "default" }: CreateCourseFo
       const res = await fetch("/api/courses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description: description || undefined }),
+        body: JSON.stringify({
+          title,
+          description: description || undefined,
+          isPublic
+        }),
       });
       const data = await res.json();
 
@@ -36,6 +41,7 @@ export default function CreateCourseForm({ variant = "default" }: CreateCourseFo
       setOpen(false);
       setTitle("");
       setDescription("");
+      setIsPublic(true); // 重置为公开
       router.refresh();
     } catch {
       setError("网络错误");
@@ -88,6 +94,25 @@ export default function CreateCourseForm({ variant = "default" }: CreateCourseFo
                   rows={3}
                   className="rounded-lg border border-slate-200 px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
                 />
+              </label>
+              <label className="flex items-center justify-between gap-4">
+                <span className="text-sm font-medium text-slate-700">课程可见性</span>
+                <button
+                  type="button"
+                  onClick={() => setIsPublic(!isPublic)}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    isPublic ? "bg-primary" : "bg-slate-300"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      isPublic ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+                <span className="text-sm text-slate-500">
+                  {isPublic ? "公开（所有人可见）" : "私有（仅自己可见）"}
+                </span>
               </label>
               <div className="flex gap-3 pt-2">
                 <button

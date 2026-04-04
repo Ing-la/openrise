@@ -104,7 +104,7 @@ export default async function AccountPage() {
                       alt={course.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform"
-                      unoptimized={course.coverImageUrl?.startsWith('/uploads/')}
+                      unoptimized={course.coverImageUrl?.indexOf('/uploads/') === 0}
                     />
                   </div>
                 ) : (
@@ -123,6 +123,15 @@ export default async function AccountPage() {
                       {course.description}
                     </p>
                   )}
+                  <div className="mb-3 flex items-center gap-2">
+                    <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
+                      course.isPublic
+                        ? "bg-green-100 text-green-800"
+                        : "bg-slate-100 text-slate-800"
+                    }`}>
+                      {course.isPublic ? "公开" : "私有"}
+                    </span>
+                  </div>
                   <p className="mt-auto text-xs text-slate-400">
                     {course._count.chapters} 章 •{" "}
                     {course.chapters.reduce((s, ch) => s + ch._count.lessons, 0)}{" "}

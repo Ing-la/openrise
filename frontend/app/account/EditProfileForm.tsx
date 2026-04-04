@@ -26,28 +26,58 @@ export default function EditProfileForm({
     setUploading(true);
     setError("");
     try {
+      console.log("开始上传头像文件:", {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        lastModified: file.lastModified
+      });
+
       const formData = new FormData();
       formData.set("file", file);
       formData.set("type", "avatar");
+
+      console.log("调用上传API...");
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
+
       const text = await res.text();
+      console.log("上传API响应状态:", res.status, "响应文本:", text);
+
       let data: { url?: string; error?: string };
       try {
         data = JSON.parse(text);
+        console.log("解析的响应数据:", data);
       } catch {
+        console.error("无法解析JSON响应:", text);
         const hint =
           res.status === 413
             ? "文件过大，请压缩后重试"
             : `请求异常 (${res.status})，请检查服务器 Nginx 与容器日志`;
         throw new Error(hint);
       }
-      if (!res.ok) throw new Error(data.error ?? "上传失败");
-      if (data.url) setAvatarUrl(data.url);
+
+      if (!res.ok) {
+        console.error("上传失败，错误:", data.error);
+        throw new Error(data.error ?? "上传失败");
+      }
+
+      if (data.url) {
+        console.log("上传成功，设置avatarUrl为:", data.url);
+        setAvatarUrl(data.url);
+
+        // 记录图片URL用于调试
+        console.log("图片URL:", data.url);
+      } else {
+        console.error("响应中没有URL字段");
+        throw new Error("服务器响应异常，未返回文件URL");
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "上传失败");
+      const errorMsg = err instanceof Error ? err.message : "上传失败";
+      console.error("头像上传错误:", errorMsg, err);
+      setError(errorMsg);
     } finally {
       setUploading(false);
     }
@@ -82,7 +112,7 @@ export default function EditProfileForm({
             {user?.avatarUrl ? (
               <Image
                 src={user.avatarUrl}
-                unoptimized={user.avatarUrl?.startsWith('/uploads/')}
+                unoptimized={user.avatarUrl?.indexOf('/uploads/') === 0}
                 alt="头像"
                 fill
                 className="object-cover"
@@ -131,7 +161,7 @@ export default function EditProfileForm({
                     {avatarUrl ? (
                       <Image
                         src={avatarUrl}
-                        unoptimized={avatarUrl?.startsWith('/uploads/')}
+                        unoptimized={avatarUrl?.indexOf('/uploads/') === 0}
                         alt=""
                         fill
                         className="object-cover"

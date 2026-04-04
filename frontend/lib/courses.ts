@@ -25,7 +25,7 @@ export interface SyllabusModule {
   lessons: { title: string; duration: string }[];
 }
 
-export const COURSES: Course[] = [
+const COURSES: Course[] = [
   {
     slug: "ai-foundations",
     title: "求职简历优化：用 AI 打造亮眼简历",
@@ -106,7 +106,7 @@ export const COURSES: Course[] = [
 ];
 
 // 课程列表页展示的课程（来自 courses-list.html）
-export const COURSES_CATALOG: Course[] = [
+const COURSES_CATALOG: Course[] = [
   {
     slug: "neural-network-architectures",
     title: "文献综述：用 AI 快速梳理研究脉络",
@@ -166,6 +166,3 @@ export const COURSES_CATALOG: Course[] = [
 // 全部课程：Core Courses 前 3 个 + 课程目录 6 个
 export const ALL_COURSES: Course[] = [...COURSES, ...COURSES_CATALOG];
 
-export function getCourseBySlug(slug: string): Course | undefined {
-  return [...COURSES, ...COURSES_CATALOG].find((c) => c.slug === slug);
-}

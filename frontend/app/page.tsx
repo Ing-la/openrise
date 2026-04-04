@@ -2,7 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import AuthButton from "@/components/AuthButton";
-import { COURSES } from "@/lib/courses";
+import { CourseService } from "@/lib/services/course-service";
+import type { PublicCourseDto } from "@/lib/types/course";
+
+export const dynamic = 'force-dynamic';
 
 const CITIES = [
   "北京",
@@ -63,7 +66,59 @@ const FOUNDERS = [
   },
 ].map((f) => ({ ...f, objectPosition: "center 35%" as const }));
 
-export default function Home() {
+// 默认精选课程（当无法从数据库获取时使用）
+const DEFAULT_FEATURED_COURSES = [
+  {
+    slug: "ai-foundations",
+    title: "求职简历优化：用 AI 打造亮眼简历",
+    desc: "零门槛实操，从准备简历文档到 AI 优化润色，产出可直接投递的成果。适合应届生、求职者。",
+    img: "/images/course-ai-foundations.jpg",
+    alt: "Abstract colorful neural network connection wires",
+    hours: "2 小时",
+    level: "入门",
+  },
+  {
+    slug: "generative-design",
+    title: "论文文献整理：AI 助你高效调研",
+    desc: "用 AI 工具快速整理文献、提炼要点、搭建知识框架。场景真实，步骤可复现，适合研究生、科研工作者。",
+    img: "/images/course-generative-design.jpg",
+    alt: "Symmetric fractal art with deep blue and purple hues",
+    hours: "3 小时",
+    level: "入门",
+  },
+  {
+    slug: "llm-engineering",
+    title: "家庭教育方案：AI 设计个性化学习计划",
+    desc: "根据孩子情况，用 AI 生成可落地的学习方案和资源推荐。解决家长真实痛点，成果可直接使用。",
+    img: "/images/course-llm-engineering.jpg",
+    alt: "Source code on a screen with blue syntax highlighting",
+    hours: "2 小时",
+    level: "入门",
+  },
+];
+
+export default async function Home() {
+  // 获取公开课程，取前3个作为精选案例
+  let publicCourses: PublicCourseDto[] = [];
+  try {
+    publicCourses = await CourseService.getPublicCourses();
+  } catch (error) {
+    console.error('Failed to fetch public courses for homepage:', error);
+    // 构建时数据库可能不可用，使用默认数据
+  }
+
+  // 如果数据库中没有足够课程，使用默认精选课程
+  const featuredCourses = publicCourses.length >= 3
+    ? publicCourses.slice(0, 3).map(course => ({
+        slug: course.slug,
+        title: course.title,
+        desc: course.description || '',
+        img: course.coverImageUrl || '/images/logo.jpg',
+        alt: course.title,
+        hours: '2h', // 默认值，后续可以从课程数据中提取
+        level: '初级', // 默认值
+      }))
+    : DEFAULT_FEATURED_COURSES;
   return (
     <div className="relative flex min-h-screen w-full flex-col">
       {/* Header */}
@@ -186,7 +241,7 @@ export default function Home() {
               </Link>
             </div>
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {COURSES.map((course) => (
+              {featuredCourses.map((course) => (
                 <Link
                   key={course.slug}
                   href={`/courses/${course.slug}`}

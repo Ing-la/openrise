@@ -13,6 +13,7 @@ const updateSchema = z.object({
   title: z.string().min(1).max(100).optional(),
   description: z.string().max(500).optional(),
   coverImageUrl: z.union([urlOrPath, z.literal("")]).optional(),
+  isPublic: z.boolean().optional(),
 });
 
 export async function GET(
@@ -79,6 +80,7 @@ export async function PATCH(
       data.description = parsed.data.description ?? null;
     if (parsed.data.coverImageUrl !== undefined)
       data.coverImageUrl = parsed.data.coverImageUrl || null;
+    if (parsed.data.isPublic !== undefined) data.isPublic = parsed.data.isPublic;
 
     const updated = await prisma.course.update({
       where: { id },

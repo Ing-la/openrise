@@ -1,18 +1,21 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
 import { authOptions } from "@/lib/auth";
+import { uploadFile, generateKey, initializeBucket } from "@/lib/s3";
 
 export async function POST(request: Request) {
+  let type = "avatar"; // 默认值，在catch块中也可访问
   try {
+    // 懒初始化MinIO存储桶
+    await initializeBucket();
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "请先登录" }, { status: 401 });
     }
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
-    const type = (formData.get("type") as string) || "avatar"; // avatar | cover
+    type = (formData.get("type") as string) || "avatar"; // avatar | cover
 
     if (!file || file.size === 0) {
       return NextResponse.json({ error: "请选择文件" }, { status: 400 });
@@ -30,22 +33,38 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "文件大小不超过 2MB" }, { status: 400 });
     }
 
-    const ext = file.name.split(".").pop() || "jpg";
-    const filename = `${type}-${session.user.id}-${Date.now()}.${ext}`;
-    const dir = join(process.cwd(), "public", "uploads", type);
-    await mkdir(dir, { recursive: true });
-    const filepath = join(dir, filename);
+    // 生成存储键并上传到MinIO
+    console.log("开始上传文件:", {
+      userId: session.user.id,
+      type,
+      originalName: file.name,
+      fileType: file.type,
+      fileSize: file.size
+    });
+
+    const key = generateKey(type as "avatar" | "cover", session.user.id, file.name);
+    console.log("生成的S3 key:", key);
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(filepath, buffer);
 
-    const url = `/uploads/${type}/${filename}`;
+    console.log("调用uploadFile，key:", key, "contentType:", file.type);
+    const url = await uploadFile(buffer, key, file.type);
+    console.log("上传成功，返回URL:", url);
+
     return NextResponse.json({ url });
   } catch (e) {
     console.error("Upload error:", e);
+    // 提供更详细的错误信息用于调试
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    console.error("Upload error details:", {
+      error: errorMessage,
+      type,
+      minioEndpoint: process.env.MINIO_ENDPOINT,
+      minioBucket: process.env.MINIO_BUCKET
+    });
     return NextResponse.json(
-      { error: "上传失败，请检查服务器日志" },
+      { error: `上传失败: ${errorMessage}` },
       { status: 500 }
     );
   }

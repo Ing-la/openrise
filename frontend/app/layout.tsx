@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+// import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-});
+// const inter = Inter({
+//   variable: "--font-inter",
+//   subsets: ["latin"],
+//   weight: ["400", "500", "600", "700"],
+// });
 
 export const metadata: Metadata = {
   title: "OpenRise | 用 AI 帮助普通人成长",
@@ -29,7 +29,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${inter.variable} font-sans text-slate-500 antialiased overflow-x-hidden bg-cream`}
+        className="font-sans text-slate-500 antialiased overflow-x-hidden bg-cream"
       >
         <Providers>{children}</Providers>
       </body>

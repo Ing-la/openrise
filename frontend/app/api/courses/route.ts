@@ -7,6 +7,7 @@ import { z } from "zod";
 const createSchema = z.object({
   title: z.string().min(1, "请输入课程名称").max(100),
   description: z.string().max(500).optional(),
+  isPublic: z.boolean().default(true), // 默认公开
 });
 
 export async function GET() {
@@ -46,6 +47,7 @@ export async function POST(request: Request) {
       data: {
         title: parsed.data.title,
         description: parsed.data.description ?? null,
+        isPublic: parsed.data.isPublic,
         userId: session.user.id,
       },
     });

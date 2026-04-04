@@ -3,6 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# 设置构建时环境变量（避免 Prisma 初始化错误）
+ENV DATABASE_URL="postgresql://dummy:password@localhost:5432/dummy"
+
 # 复制依赖文件
 COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
 
@@ -29,17 +32,17 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
+# gosu已移除，不再需要用户切换
+
 # 复制构建产物
 COPY --from=builder /app/public ./public
-# 确保上传目录存在（volume 挂载点）
-RUN mkdir -p ./public/uploads/avatar ./public/uploads/cover
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 # Prisma migrate 需完整 CLI 及依赖链，复制 node_modules（镜像略大但可靠）
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 # .next 需可写（Next.js 运行时会创建 .next/cache）
-RUN chown -R nextjs:nodejs /app/.next
+RUN chown -R 1001:1001 /app/.next
 # entrypoint 需 root 执行 chown uploads，随后 su 到 nextjs 运行应用
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
