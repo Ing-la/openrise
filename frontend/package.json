@@ -8,8 +8,7 @@
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "eslint",
-    "download-images": "node scripts/download-images.mjs",
-    "db:seed": "tsx prisma/seed.ts"
+    "download-images": "node scripts/download-images.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.9.0",

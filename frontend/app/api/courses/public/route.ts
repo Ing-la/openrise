@@ -18,7 +18,7 @@ const EXAMPLE_COURSE_TOPICS: Record<string, string> = {
 };
 
 /**
- * 公开接口：获取案例库中的全部课程（含用户创建的）
+ * 公开接口：获取内容库中的全部课程（含用户创建的）
  * 用于 /courses 页面展示
  */
 export async function GET() {
@@ -80,6 +80,7 @@ export async function GET() {
     );
   } catch (e) {
     console.error("Fetch public courses error:", e);
-    return NextResponse.json({ error: "获取课程列表失败" }, { status: 500 });
+    // 数据库错误时返回空数组，保持API健壮性
+    return NextResponse.json([]);
   }
 }

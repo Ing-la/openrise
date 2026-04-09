@@ -8,22 +8,27 @@ import AuthButton from "@/components/AuthButton";
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: "案例库 | OpenRise",
-  description: "OpenRise 精选 AI 实战案例，零门槛学习，场景实战，成果可见。",
+  title: "内容库 | Zero One",
+  description: "Zero One 精选 AI 实战内容，零门槛学习，场景实战，成果可见。",
 };
 
 export default async function CoursesPage() {
   try {
     const publicCourses = await CourseService.getPublicCourses();
 
-  return (
+    // 控制显示开关（与首页保持一致）
+    const showPricing = false;
+
+    return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-slate-100 bg-white backdrop-blur-md">
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-3">
             <Logo size={42} variant="header" />
-            <span className="text-xl font-bold tracking-tight">OpenRise</span>
+            <Link href="/" className="text-xl font-bold tracking-tight hover:text-primary transition-colors">
+              Zero One
+            </Link>
           </div>
           <nav className="hidden md:flex items-center gap-10">
             <Link
@@ -36,14 +41,16 @@ export default async function CoursesPage() {
               href="/courses"
               className="text-xs font-semibold uppercase tracking-wide text-slate-500 transition-colors hover:text-primary"
             >
-              案例库
+              内容库
             </Link>
-            <Link
-              href="/pricing"
-              className="text-xs font-semibold uppercase tracking-wide text-slate-500 transition-colors hover:text-primary"
-            >
-              定价
-            </Link>
+            {showPricing && (
+              <Link
+                href="/pricing"
+                className="text-xs font-semibold uppercase tracking-wide text-slate-500 transition-colors hover:text-primary"
+              >
+                定价
+              </Link>
+            )}
           </nav>
           <div className="flex items-center gap-4">
             <AuthButton />
@@ -54,7 +61,7 @@ export default async function CoursesPage() {
       <main className="mx-auto max-w-7xl px-6 py-12">
         {/* Page header */}
         <div className="mb-12">
-          <h1 className="mb-4 text-4xl font-bold text-slate-900">案例库</h1>
+          <h1 className="mb-4 text-4xl font-bold text-slate-900">内容库</h1>
           <p className="text-lg text-slate-600">
             零门槛学习，场景实战，成果可见。从真实场景中掌握 AI 应用能力。
           </p>
@@ -128,7 +135,9 @@ export default async function CoursesPage() {
           <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
             <div className="flex items-center gap-3">
               <Logo size={42} variant="header" />
-              <span className="text-xl font-bold tracking-tight">OpenRise</span>
+              <Link href="/" className="text-xl font-bold tracking-tight hover:text-primary transition-colors">
+                Zero One
+              </Link>
             </div>
             <div className="flex items-center gap-4">
               <AuthButton />

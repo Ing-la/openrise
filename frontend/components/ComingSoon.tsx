@@ -20,14 +20,14 @@ export default function ComingSoon({
           <div className="flex shrink-0 items-center justify-center rounded-xl border border-gray-200/90 shadow-sm">
             <Image
               src="/images/logo.jpg"
-              alt="OpenRise"
+              alt="Zero One"
               width={42}
               height={42}
               className="rounded-lg"
             />
           </div>
-          <h2 className="text-xl font-bold uppercase leading-tight tracking-tight text-primary">
-            OpenRise
+          <h2 className="text-xl font-bold tracking-tight">
+            Zero One
           </h2>
         </Link>
         <Link
@@ -146,7 +146,7 @@ export default function ComingSoon({
             </Link>
           </div>
           <p className="text-sm font-medium text-slate-400">
-            © 2024 OpenRise. 用 AI 帮助普通人成长。
+            © 2024 Zero One. 用 AI 帮助普通人成长。
           </p>
         </div>
       </footer>

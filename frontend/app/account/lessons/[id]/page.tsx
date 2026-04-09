@@ -18,7 +18,7 @@ export async function generateMetadata({
     include: { chapter: { include: { course: true } } },
   });
   if (!lesson) return { title: "小节" };
-  return { title: `${lesson.title} | OpenRise` };
+  return { title: `${lesson.title} | Zero One` };
 }
 
 export default async function LessonPage({
@@ -47,14 +47,14 @@ export default async function LessonPage({
             <div className="flex shrink-0 items-center justify-center rounded-xl border border-gray-200/90 shadow-sm">
               <Image
                 src="/images/logo.jpg"
-                alt="OpenRise"
+                alt="Zero One"
                 width={42}
                 height={42}
                 className="rounded-lg"
               />
             </div>
-            <h2 className="text-xl font-bold uppercase leading-tight tracking-tight text-primary">
-              OpenRise
+            <h2 className="text-xl font-bold tracking-tight">
+              Zero One
             </h2>
           </Link>
           <div className="flex items-center gap-4">

@@ -31,7 +31,7 @@ const TESTIMONIALS = [
     name: "王同学",
     role: "研究生",
     quote:
-      '"零基础也能跟上，老师手把手带实操。论文文献整理那期培训帮我省了一周时间，案例还能复现，太实用了。"',
+      '"零基础也能跟上，老师手把手带实操。论文文献整理那期培训帮我省了一周时间，内容还能复现，太实用了。"',
     img: "/images/testimonial-sarah.jpg",
     alt: "研究生肖像",
   },
@@ -47,58 +47,34 @@ const TESTIMONIALS = [
 
 const FOUNDERS = [
   {
-    name: "产品负责人",
-    role: "产品 & 设计",
-    img: "/images/founder-david.jpg",
-    alt: "团队成员头像",
+    name: "John",
+    role: "课程设计",
+    img: "/images/founder-john.jpg",
+    alt: "John头像",
   },
   {
-    name: "技术负责人",
-    role: "技术 & 运营",
-    img: "/images/founder-elena.jpg",
-    alt: "团队成员头像",
+    name: "小桃",
+    role: "社区运营",
+    img: "/images/founder-xiaotao.jpg",
+    alt: "小桃头像",
   },
   {
-    name: "运营负责人",
+    name: "Cozy",
+    role: "技术支持",
+    img: "/images/founder-cozy.jpg",
+    alt: "Cozy头像",
+  },
+  {
+    name: "zhangwei",
     role: "开发 & 助理",
-    img: "/images/founder-jameson.jpg",
-    alt: "团队成员头像",
+    img: "/images/founder-zhangwei.jpg",
+    alt: "zhangwei头像",
   },
 ].map((f) => ({ ...f, objectPosition: "center 35%" as const }));
 
-// 默认精选课程（当无法从数据库获取时使用）
-const DEFAULT_FEATURED_COURSES = [
-  {
-    slug: "ai-foundations",
-    title: "求职简历优化：用 AI 打造亮眼简历",
-    desc: "零门槛实操，从准备简历文档到 AI 优化润色，产出可直接投递的成果。适合应届生、求职者。",
-    img: "/images/course-ai-foundations.jpg",
-    alt: "Abstract colorful neural network connection wires",
-    hours: "2 小时",
-    level: "入门",
-  },
-  {
-    slug: "generative-design",
-    title: "论文文献整理：AI 助你高效调研",
-    desc: "用 AI 工具快速整理文献、提炼要点、搭建知识框架。场景真实，步骤可复现，适合研究生、科研工作者。",
-    img: "/images/course-generative-design.jpg",
-    alt: "Symmetric fractal art with deep blue and purple hues",
-    hours: "3 小时",
-    level: "入门",
-  },
-  {
-    slug: "llm-engineering",
-    title: "家庭教育方案：AI 设计个性化学习计划",
-    desc: "根据孩子情况，用 AI 生成可落地的学习方案和资源推荐。解决家长真实痛点，成果可直接使用。",
-    img: "/images/course-llm-engineering.jpg",
-    alt: "Source code on a screen with blue syntax highlighting",
-    hours: "2 小时",
-    level: "入门",
-  },
-];
 
 export default async function Home() {
-  // 获取公开课程，取前3个作为精选案例
+  // 获取公开课程，取前3个作为主题内容
   let publicCourses: PublicCourseDto[] = [];
   try {
     publicCourses = await CourseService.getPublicCourses();
@@ -107,18 +83,22 @@ export default async function Home() {
     // 构建时数据库可能不可用，使用默认数据
   }
 
-  // 如果数据库中没有足够课程，使用默认精选课程
-  const featuredCourses = publicCourses.length >= 3
-    ? publicCourses.slice(0, 3).map(course => ({
-        slug: course.slug,
-        title: course.title,
-        desc: course.description || '',
-        img: course.coverImageUrl || '/images/logo.jpg',
-        alt: course.title,
-        hours: '2h', // 默认值，后续可以从课程数据中提取
-        level: '初级', // 默认值
-      }))
-    : DEFAULT_FEATURED_COURSES;
+  // 精选课程：取前3个公开课程（如果没有则显示空）
+  const featuredCourses = publicCourses.slice(0, 3).map(course => ({
+    slug: course.slug,
+    title: course.title,
+    desc: course.description || '',
+    img: course.coverImageUrl || '/images/logo.jpg',
+    alt: course.title,
+    hours: '2h', // 默认值，后续可以从课程数据中提取
+    level: '初级', // 默认值
+  }));
+
+  // 控制显示开关
+  const showPricing = false;
+  const showMembershipCTA = false;
+  const showTestimonials = false;
+
   return (
     <div className="relative flex min-h-screen w-full flex-col">
       {/* Header */}
@@ -126,7 +106,7 @@ export default async function Home() {
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-3">
             <Logo size={42} variant="header" />
-            <span className="text-xl font-bold tracking-tight">OpenRise</span>
+            <span className="text-xl font-bold tracking-tight">Zero One</span>
           </div>
           <nav className="hidden md:flex items-center gap-10">
             <Link
@@ -139,14 +119,16 @@ export default async function Home() {
               href="/courses"
               className="text-xs font-semibold uppercase tracking-wide text-slate-500 transition-colors hover:text-primary"
             >
-              案例库
+              内容库
             </Link>
-            <Link
-              href="/pricing"
-              className="text-xs font-semibold uppercase tracking-wide text-slate-500 transition-colors hover:text-primary"
-            >
-              定价
-            </Link>
+            {showPricing && (
+              <Link
+                href="/pricing"
+                className="text-xs font-semibold uppercase tracking-wide text-slate-500 transition-colors hover:text-primary"
+              >
+                定价
+              </Link>
+            )}
           </nav>
           <div className="flex items-center gap-4">
             <AuthButton />
@@ -169,21 +151,20 @@ export default async function Home() {
                 </span>
               </div>
               <h1 className="font-display text-5xl leading-[1.1] tracking-tight text-slate-700 md:text-7xl">
-                用 AI 把想法
-                <span className="text-primary"> 变现实</span>
+                从 0 到 1，用 AI 创造你的无限
               </h1>
               <p className="max-w-lg text-lg leading-relaxed text-slate-500">
-                帮助 99% 的普通人掌握 AI 应用能力。零门槛学习，场景实战，从「会聊天」到「会应用」，通过实践成长为建造者。
+                打破技术壁垒，任何人皆可从零起步。开启属于你的 AI 创造之旅，成为独特的数字化建造者。
               </p>
               <div className="flex flex-col gap-4 pt-4 sm:flex-row">
-                <button className="rounded-2xl bg-primary px-8 py-4 text-base font-bold text-white shadow-lg transition-all hover:bg-primary/90">
+                <Link href="/community" className="rounded-2xl bg-primary px-8 py-4 text-base font-bold text-white shadow-lg transition-all hover:bg-primary/90">
                   加入社区
-                </button>
+                </Link>
                 <Link
                   href="/courses"
                   className="rounded-2xl border border-slate-100 bg-slate-50 px-8 py-4 text-base font-bold text-slate-700 transition-all hover:bg-slate-100"
                 >
-                  查看案例
+                  查看内容
                 </Link>
               </div>
             </div>
@@ -224,7 +205,7 @@ export default async function Home() {
             <div className="mb-16 flex items-end justify-between">
               <div>
                 <h2 className="font-display mb-4 text-4xl font-bold text-slate-700">
-                  精选案例
+                  主题内容
                 </h2>
                 <p className="text-slate-500">
                   零门槛学习，场景实战，成果可见。从真实场景中掌握 AI 应用能力。
@@ -234,85 +215,97 @@ export default async function Home() {
                 href="/courses"
                 className="group flex items-center gap-1 font-bold text-primary"
               >
-                全部案例
+                全部内容
                 <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">
                   arrow_forward
                 </span>
               </Link>
             </div>
-            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {featuredCourses.map((course) => (
-                <Link
-                  key={course.slug}
-                  href={`/courses/${course.slug}`}
-                  className="group block rounded-3xl border border-green-100 bg-white p-5 shadow-sm transition-all hover:border-primary/30"
-                >
-                  <div className="mb-6 aspect-video overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800">
-                    <Image
-                      src={course.img}
-                      alt={course.alt}
-                      width={400}
-                      height={225}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                  <h3 className="mb-2 text-xl font-bold text-slate-700">
-                    {course.title}
-                  </h3>
-                  <p className="mb-4 text-sm leading-relaxed text-slate-500">
-                    {course.desc}
-                  </p>
-                  <div className="flex items-center gap-4 text-xs font-bold text-slate-500">
-                    <span className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-base">
-                        schedule
+            {featuredCourses.length > 0 ? (
+              <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+                {featuredCourses.map((course) => (
+                  <Link
+                    key={course.slug || course.title}
+                    href={course.slug ? `/courses/${course.slug}` : "/courses"}
+                    className="group block rounded-3xl border border-green-100 bg-white p-5 shadow-sm transition-all hover:border-primary/30"
+                  >
+                    <div className="mb-6 aspect-video overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800">
+                      <Image
+                        src={course.img}
+                        alt={course.alt}
+                        width={400}
+                        height={225}
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                    <h3 className="mb-2 text-xl font-bold text-slate-700">
+                      {course.title}
+                    </h3>
+                    <p className="mb-4 text-sm leading-relaxed text-slate-500">
+                      {course.desc}
+                    </p>
+                    <div className="flex items-center gap-4 text-xs font-bold text-slate-500">
+                      <span className="flex items-center gap-1">
+                        <span className="material-symbols-outlined text-base">
+                          schedule
+                        </span>
+                        {course.hours}
                       </span>
-                      {course.hours}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <span className="material-symbols-outlined text-base">
-                        bar_chart
+                      <span className="flex items-center gap-1">
+                        <span className="material-symbols-outlined text-base">
+                          bar_chart
+                        </span>
+                        {course.level}
                       </span>
-                      {course.level}
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-3xl border-2 border-dashed border-slate-200 bg-white px-8 py-16 text-center">
+                <span className="material-symbols-outlined mb-4 text-5xl text-slate-300">
+                  menu_book
+                </span>
+                <p className="mb-2 text-slate-600">暂无公开课程</p>
+                <p className="text-sm text-slate-500">公开课程将会在这里展示</p>
+              </div>
+            )}
           </div>
         </section>
 
         {/* Testimonials */}
-        <section className="bg-green-50/30 px-6 py-32">
-          <div className="mx-auto max-w-7xl">
-            <h2 className="font-display mb-16 text-center text-4xl font-bold text-slate-700">
-              学员怎么说
-            </h2>
-            <div className="grid gap-8 md:grid-cols-3">
-              {TESTIMONIALS.map((t) => (
-                <div
-                  key={t.name}
-                  className="rounded-3xl border border-green-100 bg-white p-10 shadow-sm"
-                >
-                  <div className="mb-6 flex items-center gap-4">
-                    <Image
-                      src={t.img}
-                      alt={t.alt}
-                      width={48}
-                      height={48}
-                      className="size-12 rounded-full object-cover"
-                    />
-                    <div>
-                      <h4 className="font-bold text-slate-700">{t.name}</h4>
-                      <p className="text-xs text-slate-500">{t.role}</p>
+        {showTestimonials && (
+          <section className="bg-green-50/30 px-6 py-32">
+            <div className="mx-auto max-w-7xl">
+              <h2 className="font-display mb-16 text-center text-4xl font-bold text-slate-700">
+                学员怎么说
+              </h2>
+              <div className="grid gap-8 md:grid-cols-3">
+                {TESTIMONIALS.map((t) => (
+                  <div
+                    key={t.name}
+                    className="rounded-3xl border border-green-100 bg-white p-10 shadow-sm"
+                  >
+                    <div className="mb-6 flex items-center gap-4">
+                      <Image
+                        src={t.img}
+                        alt={t.alt}
+                        width={48}
+                        height={48}
+                        className="size-12 rounded-full object-cover"
+                      />
+                      <div>
+                        <h4 className="font-bold text-slate-700">{t.name}</h4>
+                        <p className="text-xs text-slate-500">{t.role}</p>
+                      </div>
                     </div>
+                    <p className="italic text-slate-500">{t.quote}</p>
                   </div>
-                  <p className="italic text-slate-500">{t.quote}</p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Founders */}
         <section className="bg-cream px-6 py-32">
@@ -345,64 +338,66 @@ export default async function Home() {
         </section>
 
         {/* CTA */}
-        <section className="bg-cream px-6 py-32">
-          <div className="mx-auto max-w-4xl">
-            <div className="relative overflow-hidden rounded-3xl bg-primary p-12 text-white shadow-2xl md:p-20">
-              <div className="absolute -mr-20 -mt-20 top-0 right-0 size-80 rounded-full bg-white/10 blur-3xl" />
-              <div className="absolute -ml-20 -mb-20 bottom-0 left-0 size-60 rounded-full blur-3xl" />
-              <div className="relative z-10 flex flex-col items-center gap-8 text-center">
-                <div className="inline-block rounded-full bg-white/20 px-4 py-1.5 text-sm font-bold uppercase tracking-widest backdrop-blur-sm">
-                  限时创始成员招募
-                </div>
-                <h2 className="text-4xl font-bold leading-tight text-white md:text-5xl">
-                  成为创始成员
-                </h2>
-                <p className="max-w-xl text-lg text-white/80">
-                  从第一天起与我们一起成长，享受终身专属权益，和志同道合的人一起维护、贡献内容。
-                </p>
-                <div className="mt-4 grid w-full max-w-lg gap-4 text-left sm:grid-cols-2">
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined">
-                      check_circle
-                    </span>
-                    <span>场景化 AI 实战培训</span>
+        {showMembershipCTA && (
+          <section className="bg-cream px-6 py-32">
+            <div className="mx-auto max-w-4xl">
+              <div className="relative overflow-hidden rounded-3xl bg-primary p-12 text-white shadow-2xl md:p-20">
+                <div className="absolute -mr-20 -mt-20 top-0 right-0 size-80 rounded-full bg-white/10 blur-3xl" />
+                <div className="absolute -ml-20 -mb-20 bottom-0 left-0 size-60 rounded-full blur-3xl" />
+                <div className="relative z-10 flex flex-col items-center gap-8 text-center">
+                  <div className="inline-block rounded-full bg-white/20 px-4 py-1.5 text-sm font-bold uppercase tracking-widest backdrop-blur-sm">
+                    限时创始成员招募
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined">
-                      check_circle
-                    </span>
-                    <span>社群交流与互助</span>
+                  <h2 className="text-4xl font-bold leading-tight text-white md:text-5xl">
+                    成为创始成员
+                  </h2>
+                  <p className="max-w-xl text-lg text-white/80">
+                    从第一天起与我们一起成长，享受终身专属权益，和志同道合的人一起维护、贡献内容。
+                  </p>
+                  <div className="mt-4 grid w-full max-w-lg gap-4 text-left sm:grid-cols-2">
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined">
+                        check_circle
+                      </span>
+                      <span>场景化 AI 实战培训</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined">
+                        check_circle
+                      </span>
+                      <span>社群交流与互助</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined">
+                        check_circle
+                      </span>
+                      <span>创始成员标识</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="material-symbols-outlined">
+                        check_circle
+                      </span>
+                      <span>新内容抢先体验</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined">
-                      check_circle
-                    </span>
-                    <span>创始成员标识</span>
+                  <div className="mt-8 flex flex-col items-center gap-4">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-5xl font-black">¥199</span>
+                      <span className="text-xl text-white/60">/月</span>
+                    </div>
+                    <Link
+                      href="/register"
+                      className="w-full rounded-2xl bg-white px-12 py-5 text-center text-lg font-bold text-primary transition-all hover:shadow-lg sm:w-auto"
+                    >
+                      立即加入
+                    </Link>
+                    <p className="text-xs text-white/40">随时取消，无需承诺。</p>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined">
-                      check_circle
-                    </span>
-                    <span>新案例抢先体验</span>
-                  </div>
-                </div>
-                <div className="mt-8 flex flex-col items-center gap-4">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-black">¥199</span>
-                    <span className="text-xl text-white/60">/月</span>
-                  </div>
-                  <Link
-                    href="/register"
-                    className="w-full rounded-2xl bg-white px-12 py-5 text-center text-lg font-bold text-primary transition-all hover:shadow-lg sm:w-auto"
-                  >
-                    立即加入
-                  </Link>
-                  <p className="text-xs text-white/40">随时取消，无需承诺。</p>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
       </main>
 
       {/* Footer */}
@@ -411,7 +406,7 @@ export default async function Home() {
           <div className="flex items-center gap-3">
             <Logo size={36} />
             <span className="text-lg font-bold tracking-tight text-slate-700">
-              OpenRise
+              Zero One
             </span>
           </div>
           <div className="flex gap-8 text-sm text-slate-500">
@@ -462,7 +457,7 @@ export default async function Home() {
           </div>
         </div>
         <div className="mx-auto mt-8 max-w-7xl text-center text-xs text-slate-500">
-          © 2024 OpenRise. 用 AI 帮助普通人成长。
+          © 2024 Zero One. 用 AI 帮助普通人成长。
         </div>
       </footer>
     </div>

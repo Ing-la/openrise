@@ -214,6 +214,21 @@ ai-web-community/
 - **备份策略**：定期备份数据库 volume 和 MinIO volume
 - **监控**：配置服务健康检查和日志收集
 
+## 项目文档
+
+详细的项目文档位于 `docs/` 目录：
+
+| 文档 | 描述 |
+|------|------|
+| [📋 项目架构](docs/project-architecture.md) | 系统整体架构、技术栈、服务设计 |
+| [🧭 代码库指南](docs/codebase-guide.md) | 代码组织、常见修改模式、开发工作流 |
+| [🎛️ UI功能开关](docs/ui-feature-flags.md) | 条件渲染、功能开关、隐藏元素管理 |
+| [🚀 开发指南](DEVELOPMENT.md) | 本地开发环境设置、部署流程 |
+
+最新更新（2026-04-09）：
+- 首页隐藏了定价链接和会员CTA模块（通过 `showPricing` 和 `showMembershipCTA` 开关控制）
+- 详细记录见 [UI功能开关文档](docs/ui-feature-flags.md)
+
 ## License
 
 MIT

@@ -28,7 +28,7 @@ export async function generateMetadata({
     return { title: "课程不匹配" };
   }
 
-  return { title: `${lesson.title} | OpenRise` };
+  return { title: `${lesson.title} | Zero One` };
 }
 
 export default async function PublicLessonPage({
@@ -63,14 +63,14 @@ export default async function PublicLessonPage({
             <div className="flex shrink-0 items-center justify-center rounded-xl border border-gray-200/90 shadow-sm">
               <Image
                 src="/images/logo.jpg"
-                alt="OpenRise"
+                alt="Zero One"
                 width={42}
                 height={42}
                 className="rounded-lg"
               />
             </div>
-            <h2 className="text-xl font-bold uppercase leading-tight tracking-tight text-primary">
-              OpenRise
+            <h2 className="text-xl font-bold tracking-tight">
+              Zero One
             </h2>
           </Link>
           <div className="flex items-center gap-4">
@@ -90,7 +90,7 @@ export default async function PublicLessonPage({
         <div className="mb-8 flex flex-col gap-2">
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <Link href="/courses" className="hover:text-primary">
-              案例库
+              内容库
             </Link>
             <span className="material-symbols-outlined text-xs">chevron_right</span>
             <Link href={`/courses/${courseId}`} className="hover:text-primary">

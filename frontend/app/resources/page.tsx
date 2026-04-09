@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import ComingSoon from "@/components/ComingSoon";
 
 export const metadata: Metadata = {
-  title: "资源 | OpenRise",
+  title: "资源 | Zero One",
   description:
-    "OpenRise 资源中心。指南、教程和工具，助力你的 AI 应用学习之旅。",
+    "Zero One 资源中心。指南、教程和工具，助力你的 AI 应用学习之旅。",
 };
 
 export default function ResourcesPage() {

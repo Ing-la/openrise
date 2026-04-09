@@ -23,20 +23,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     if (!course) {
       return {
-        title: "课程不存在 | OpenRise",
+        title: "课程不存在 | Zero One",
         description: "请求的课程不存在或无权访问",
       };
     }
 
     return {
-      title: `${course.title} | OpenRise`,
-      description: course.description || "OpenRise 课程",
+      title: `${course.title} | Zero One`,
+      description: course.description || "Zero One 课程",
     };
   } catch (error) {
     console.error('Failed to generate metadata for course:', error);
     return {
-      title: "课程 | OpenRise",
-      description: "OpenRise 课程",
+      title: "课程 | Zero One",
+      description: "Zero One 课程",
     };
   }
 }
@@ -48,11 +48,14 @@ export default async function CourseDetailPage({ params }: Props) {
   const userId = session?.user?.id;
   const course = await CourseService.getCourseDetail(slug, userId);
 
+  // 控制显示开关（与首页保持一致）
+  const showPricing = false;
+
   if (!course) {
     notFound();
   }
 
-  const isOwner = userId && course.instructor?.name === "OpenRise官方" ? false : userId ? await CourseService.isCourseOwner(slug, userId) : false;
+  const isOwner = userId && course.instructor?.name === "Zero One官方" ? false : userId ? await CourseService.isCourseOwner(slug, userId) : false;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -61,7 +64,9 @@ export default async function CourseDetailPage({ params }: Props) {
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-3">
             <Logo size={42} variant="header" />
-            <span className="text-xl font-bold tracking-tight">OpenRise</span>
+            <Link href="/" className="text-xl font-bold tracking-tight hover:text-primary transition-colors">
+              Zero One
+            </Link>
           </div>
           <nav className="hidden md:flex items-center gap-10">
             <Link
@@ -74,14 +79,16 @@ export default async function CourseDetailPage({ params }: Props) {
               href="/courses"
               className="text-xs font-semibold uppercase tracking-wide text-slate-500 transition-colors hover:text-primary"
             >
-              案例库
+              内容库
             </Link>
-            <Link
-              href="/pricing"
-              className="text-xs font-semibold uppercase tracking-wide text-slate-500 transition-colors hover:text-primary"
-            >
-              定价
-            </Link>
+            {showPricing && (
+              <Link
+                href="/pricing"
+                className="text-xs font-semibold uppercase tracking-wide text-slate-500 transition-colors hover:text-primary"
+              >
+                定价
+              </Link>
+            )}
           </nav>
           <div className="flex items-center gap-4">
             <AuthButton />
@@ -214,7 +221,7 @@ export default async function CourseDetailPage({ params }: Props) {
                 href="/courses"
                 className="rounded-2xl border border-slate-200 bg-white px-8 py-4 text-base font-bold text-slate-700 hover:bg-slate-50"
               >
-                返回案例库
+                返回内容库
               </Link>
             </div>
           </div>
@@ -230,7 +237,9 @@ export default async function CourseDetailPage({ params }: Props) {
           <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
             <div className="flex items-center gap-3">
               <Logo size={42} variant="header" />
-              <span className="text-xl font-bold tracking-tight">OpenRise</span>
+              <Link href="/" className="text-xl font-bold tracking-tight hover:text-primary transition-colors">
+                Zero One
+              </Link>
             </div>
             <div className="flex items-center gap-4">
               <AuthButton />
@@ -245,7 +254,7 @@ export default async function CourseDetailPage({ params }: Props) {
             <p className="mb-2 text-slate-600">加载课程失败</p>
             <p className="text-sm text-slate-500">请稍后再试或联系管理员</p>
             <Link href="/courses" className="mt-6 inline-block rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-bold text-slate-700 hover:bg-slate-50">
-              返回案例库
+              返回内容库
             </Link>
           </div>
         </main>

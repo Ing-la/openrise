@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import ComingSoon from "@/components/ComingSoon";
 
 export const metadata: Metadata = {
-  title: "社区 | OpenRise",
+  title: "社区 | Zero One",
   description:
-    "加入 OpenRise 社区。与志同道合的人一起维护、贡献内容，共同成长。",
+    "加入 Zero One 社区。与志同道合的人一起维护、贡献内容，共同成长。",
 };
 
 export default function CommunityPage() {

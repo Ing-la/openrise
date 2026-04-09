@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import ComingSoon from "@/components/ComingSoon";
 
 export const metadata: Metadata = {
-  title: "定价 | OpenRise",
+  title: "定价 | Zero One",
   description:
-    "OpenRise 定价方案。找到适合你的 AI 学习计划。",
+    "Zero One 定价方案。找到适合你的 AI 学习计划。",
 };
 
 export default function PricingPage() {

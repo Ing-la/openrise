@@ -1,0 +1,53 @@
+# Docker Compose 开发环境覆盖配置
+# 默认情况下，只启动 db 和 minio 服务
+# 启动全部服务（包括 frontend 和 nginx）使用：docker-compose --profile production up -d
+
+version: '3.8'
+
+services:
+  # 前端服务 - 仅在 production profile 中启动
+  frontend:
+    profiles: ["production"]
+    # 开发环境下，前端在主机上通过 npm run dev 运行
+    # 因此不需要在容器中启动
+    # 如果需要容器化开发，可以取消注释以下配置：
+    # build:
+    #   context: ./frontend
+    #   dockerfile: Dockerfile.dev  # 需要创建 Dockerfile.dev
+    # command: npm run dev
+    # ports:
+    #   - "3000:3000"
+    # volumes:
+    #   - ./frontend:/app
+    #   - /app/node_modules
+
+  # Nginx 反向代理 - 仅在 production profile 中启动
+  nginx:
+    profiles: ["production"]
+    # 开发环境下不需要 nginx，前端直接在 localhost:3000 运行
+
+  # 数据库服务 - 开发环境增强配置
+  db:
+    # 可以添加开发环境特定的配置，如更快的重启策略
+    restart: unless-stopped
+    # 确保数据卷在开发环境下持久化
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro  # 可选：初始化脚本
+
+  # MinIO 对象存储 - 开发环境增强配置
+  minio:
+    restart: unless-stopped
+    # 开发环境下可以挂载本地目录方便调试
+    volumes:
+      - minio_data:/data
+      - ./minio/config:/root/.minio:ro  # 可选：配置目录
+
+# 网络和卷定义（与主文件保持一致）
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db_data:
+  minio_data:
