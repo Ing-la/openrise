@@ -1,0 +1,66 @@
+name: Deploy to Beijing Server
+
+# 触发条件：当你向 main 分支 push 代码时执行
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  # 任务一：构建并推送镜像
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # 1. 登录阿里云私有仓库
+      - name: Login to ACR
+        uses: aliyun/acr-login@v1
+        with:
+          login-server: ${{ secrets.ACR_REGISTRY }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      # 2. 构建 Docker 镜像并推送到阿里云
+      - name: Build and Push Image
+        run: |
+          # 注意：这里的 01-builders/01-builders 是根据你阿里云截图设置的
+          # Dockerfile在frontend目录，构建上下文需要指向该目录
+          docker build -t ${{ secrets.ACR_REGISTRY }}/01-builders/01-builders:latest ./frontend
+          docker push ${{ secrets.ACR_REGISTRY }}/01-builders/01-builders:latest
+
+  # 任务二：远程指挥服务器拉取并重启
+  deploy:
+    needs: build-and-push # 必须等任务一成功后才执行任务二
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: root # 如果你的服务器登录名不是 root 请修改
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            # --- 以下是在你北京服务器上执行的指令 ---
+            
+            # 1. 进入你服务器上存放 docker-compose.yml 的目录 (请根据实际路径修改)
+            cd /root/ing/openrise 
+
+            # 2. 在服务器上重新登录一次阿里云 (确保万无一失)
+            docker login --username=${{ secrets.ACR_USERNAME }} --password=${{ secrets.ACR_PASSWORD }} ${{ secrets.ACR_REGISTRY }}
+
+            # 3. 拉取刚才推送到阿里云的最新的镜像
+            docker pull ${{ secrets.ACR_REGISTRY }}/01-builders/01-builders:latest
+
+            # 4. 创建docker-compose.override.yml使用ACR镜像
+            cat > docker-compose.override.yml << EOF
+services:
+  frontend:
+    image: ${{ secrets.ACR_REGISTRY }}/01-builders/01-builders:latest
+EOF
+
+            # 5. 重启前端服务 (使用从ACR拉取的最新镜像)
+            docker-compose -f docker-compose.yml -f docker-compose.override.yml up -d frontend
+
+            # 6. 清理服务器上的旧镜像，防止硬盘爆满
+            docker image prune -f
