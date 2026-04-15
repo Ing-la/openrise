@@ -30,18 +30,18 @@ services:
   db:
     # 可以添加开发环境特定的配置，如更快的重启策略
     restart: unless-stopped
-    # 确保数据卷在开发环境下持久化
-    volumes:
-      - db_data:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro  # 可选：初始化脚本
+    # 主配置中已经定义了数据卷挂载，这里不需要重复
+    # 如果需要初始化脚本，可以取消注释以下行并创建 init.sql 文件：
+    # volumes:
+    #   - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
 
   # MinIO 对象存储 - 开发环境增强配置
   minio:
     restart: unless-stopped
-    # 开发环境下可以挂载本地目录方便调试
-    volumes:
-      - minio_data:/data
-      - ./minio/config:/root/.minio:ro  # 可选：配置目录
+    # 主配置中已经定义了数据卷挂载，这里不需要重复
+    # 如果需要本地配置目录，可以取消注释以下行并创建 config 目录：
+    # volumes:
+    #   - ./minio/config:/root/.minio:ro
 
 # 网络和卷定义（与主文件保持一致）
 networks:

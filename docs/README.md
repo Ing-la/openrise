@@ -18,7 +18,7 @@
 ### 运维部署
 | 文档 | 描述 | 主要读者 |
 |------|------|----------|
-| [🚀 开发指南](../DEVELOPMENT.md) | 本地开发环境设置、部署流程 | 所有开发者 |
+| [🚀 开发指南](../DEV_GUIDE.md) | 本地开发环境设置、部署流程 | 所有开发者 |
 | [📖 项目说明](../README.md) | 项目概述、快速开始、功能列表 | 所有用户 |
 
 ## 文档更新日志
@@ -40,7 +40,7 @@
 ### 对于新开发者
 1. 从 [项目架构](project-architecture.md) 开始了解整体设计
 2. 阅读 [代码库指南](codebase-guide.md) 理解代码组织
-3. 查看 [开发指南](../DEVELOPMENT.md) 设置本地环境
+3. 查看 [开发指南](../DEV_GUIDE.md) 设置本地环境
 
 ### 对于 AI Agent
 1. 使用 [代码库指南](codebase-guide.md) 了解代码模式
@@ -76,7 +76,7 @@
 - **首页**: `frontend/app/page.tsx`
 - **认证配置**: `frontend/lib/auth.ts`
 - **数据库模型**: `frontend/prisma/schema.prisma`
-- **环境配置**: `.env.development`, `frontend/.env.local`
+- **环境配置**: `.env`, `frontend/.env.local`
 
 ### 重要配置
 - **数据库**: `DATABASE_URL` (PostgreSQL连接)
@@ -86,7 +86,7 @@
 ## 获取帮助
 
 1. **代码问题**: 查看相关文档和代码注释
-2. **环境问题**: 参考 [开发指南](../DEVELOPMENT.md)
+2. **环境问题**: 参考 [开发指南](../DEV_GUIDE.md)
 3. **架构问题**: 阅读 [项目架构](project-architecture.md)
 4. **功能状态**: 检查 [UI功能开关](ui-feature-flags.md)
 

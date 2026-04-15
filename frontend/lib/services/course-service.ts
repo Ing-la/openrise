@@ -31,7 +31,17 @@ export class CourseService {
       return null;
     }
 
-    // 查询课程数据
+    // 先查询课程基本信息，检查用户是否是作者
+    const courseWithOwner = await prisma.course.findUnique({
+      where: { id: courseId },
+      select: { id: true, userId: true }
+    });
+
+    if (!courseWithOwner) return null;
+
+    const isOwner = userId && courseWithOwner.userId === userId;
+
+    // 查询完整的课程数据，根据用户身份过滤小节
     const course = await prisma.course.findUnique({
       where: { id: courseId },
       include: {
@@ -40,7 +50,8 @@ export class CourseService {
           orderBy: { sortOrder: 'asc' },
           include: {
             lessons: {
-              orderBy: { sortOrder: 'asc' }
+              orderBy: { sortOrder: 'asc' },
+              where: isOwner ? undefined : { isPublic: true } // 非作者只看到公开小节
             }
           }
         }
@@ -50,7 +61,19 @@ export class CourseService {
     if (!course) return null;
 
     // 转换为DTO
-    return courseEntityToDetailDto(course);
+    const dto = courseEntityToDetailDto(course);
+
+    // 重新计算小节总数（因为可能过滤了私有小节）
+    if (!isOwner) {
+      dto.lessonCount = course.chapters.reduce((sum, chapter) => sum + chapter.lessons.length, 0);
+      // 同时需要更新每个章节的小节计数
+      dto.syllabus = dto.syllabus.map((module, idx) => ({
+        ...module,
+        lessonCount: course.chapters[idx]?.lessons.length || 0
+      }));
+    }
+
+    return dto;
   }
 
   /**
@@ -93,7 +116,9 @@ export class CourseService {
         user: true,
         chapters: {
           include: {
-            lessons: true
+            lessons: {
+              where: { isPublic: true } // 只获取公开小节
+            }
           }
         }
       },

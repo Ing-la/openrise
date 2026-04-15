@@ -100,7 +100,7 @@ export interface SyllabusModuleDto {
 export interface LessonItemDto {
   id: string;
   title: string;
-  type: 'video' | 'markdown';
+  type: 'video' | 'markdown' | 'pdf' | 'image';
   duration?: string;
 }
 
@@ -110,9 +110,12 @@ export interface LessonItemDto {
 export interface LessonDetailDto {
   id: string;
   title: string;
-  type: 'video' | 'markdown';
+  type: 'video' | 'markdown' | 'pdf' | 'image';
+  isPublic: boolean;
   content?: string;
   videoUrl?: string;
+  pdfUrl?: string;  // 新增
+  imageUrls?: string[];  // 新增，图片类型小节的图片URL数组
   platform?: string;
   chapter: {
     id: string;
@@ -165,7 +168,7 @@ export function courseEntityToDetailDto(course: CourseEntity): CourseDetailDto {
     lessons: chapter.lessons.map(lesson => ({
       id: lesson.id,
       title: lesson.title,
-      type: lesson.type as 'video' | 'markdown',
+      type: lesson.type as 'video' | 'markdown' | 'pdf' | 'image',
       duration: '-', // 可以扩展
     })),
   }));
@@ -197,9 +200,12 @@ export function lessonEntityToDetailDto(lesson: LessonEntity): LessonDetailDto {
   return {
     id: lesson.id,
     title: lesson.title,
-    type: lesson.type as 'video' | 'markdown',
+    type: lesson.type as 'video' | 'markdown' | 'pdf' | 'image',
+    isPublic: lesson.isPublic,
     content: lesson.content ?? undefined,
     videoUrl: lesson.videoUrl ?? undefined,
+    pdfUrl: lesson.pdfUrl ?? undefined,  // 新增
+    imageUrls: lesson.imageUrls && lesson.imageUrls.length > 0 ? lesson.imageUrls : undefined,
     platform: lesson.platform ?? undefined,
     chapter: {
       id: lesson.chapter.id,

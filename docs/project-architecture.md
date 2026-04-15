@@ -119,14 +119,16 @@ ai-web-community/
 │   └── package.json           # 依赖配置
 ├── nginx/                     # 反向代理配置
 │   └── nginx.conf             # Nginx配置文件
-├── db/                        # 数据库初始化脚本
-├── minio/                     # MinIO配置（存储桶策略等）
+├── db/                        # 数据库相关文件
+├── minio/                     # MinIO对象存储配置
 ├── docs/                      # 项目文档（本文档所在目录）
-├── .env.development           # 开发环境变量
-├── .env.example               # 环境变量模板
+├── .env                       # 开发环境变量（不提交）
+├── .env.example               # 环境变量模板（提交）
+├── .env.production            # 生产环境变量示例（不提交）
 ├── docker-compose.yml         # 主Docker编排配置
 ├── docker-compose.override.yml # 开发环境覆盖配置
-├── DEVELOPMENT.md             # 开发指南
+├── DEV_GUIDE.md               # 开发指南
+├── start-dev.ps1              # 一键启动脚本（Windows）
 └── README.md                  # 项目说明
 ```
 
@@ -158,11 +160,11 @@ ai-web-community/
 
 ### 环境变量层级
 
-1. **Docker层** (`.env.development`)
-   - 数据库连接、MinIO配置、服务端口
+1. **Docker层** (`.env`, `.env.example`)
+   - 数据库连接、MinIO配置、服务端口（`.env` 不提交，`.env.example` 为模板）
 
-2. **前端层** (`frontend/.env.development`, `frontend/.env.local`)
-   - NextAuth密钥、API端点、功能开关
+2. **前端层** (`frontend/.env.local`, `frontend/.env.example`)
+   - NextAuth密钥、API端点、功能开关（`.env.local` 不提交，`.env.example` 为模板）
 
 3. **生产层** (服务器上单独配置)
    - 安全密钥、生产数据库连接、邮件服务配置
@@ -181,7 +183,7 @@ ai-web-community/
 | 数据库主机 | `localhost:5432` | `db:5432` (容器网络) |
 | MinIO端点 | `localhost:9000` | `minio:9000` (容器网络) |
 | Nginx | 禁用 | 启用（反向代理） |
-| 环境变量 | `.env.development` | 服务器 `.env` |
+| 环境变量 | `.env` (本地开发) | 服务器 `.env` (生产) |
 | 文件上传 | 本地MinIO | 生产MinIO |
 
 ## 扩展性设计

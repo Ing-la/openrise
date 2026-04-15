@@ -178,30 +178,40 @@ export default async function CourseDetailPage({ params }: Props) {
                         <span className="text-sm text-slate-500">{module.lessonCount} 节</span>
                       </div>
                       <div className="grid gap-3">
-                        {module.lessons.map((lesson, lessonIdx) => (
-                          <div
-                            key={lesson.id}
-                            className="flex items-center gap-4 rounded-lg border border-slate-100 bg-slate-50/50 px-4 py-3"
-                          >
-                            <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
-                              {lessonIdx + 1}
-                            </span>
-                            <div className="flex-1">
-                              <h4 className="font-medium text-slate-800">{lesson.title}</h4>
-                              <div className="flex items-center gap-2 text-xs text-slate-500">
-                                <span className="material-symbols-outlined text-sm">description</span>
-                                <span>{lesson.type === 'video' ? '视频' : '文档'}</span>
-                                {lesson.duration && <span>· {lesson.duration}</span>}
-                              </div>
-                            </div>
-                            <Link
-                              href={`/courses/${course.slug}/lessons/${lesson.id}`}
-                              className="rounded-lg border border-primary px-3 py-1 text-xs font-semibold text-primary hover:bg-primary/5"
+                        {module.lessons.map((lesson, lessonIdx) => {
+                          // 类型配置映射
+                          const typeConfig = {
+                            video: { icon: 'play_circle', label: '视频' },
+                            markdown: { icon: 'description', label: '文档' },
+                            pdf: { icon: 'picture_as_pdf', label: '文档' },
+                            image: { icon: 'photo_library', label: '图片' }
+                          } as const;
+                          const config = typeConfig[lesson.type as keyof typeof typeConfig] || typeConfig.markdown;
+                          return (
+                            <div
+                              key={lesson.id}
+                              className="flex items-center gap-4 rounded-lg border border-slate-100 bg-slate-50/50 px-4 py-3"
                             >
-                              学习
-                            </Link>
-                          </div>
-                        ))}
+                              <span className="flex size-6 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary">
+                                {lessonIdx + 1}
+                              </span>
+                              <div className="flex-1">
+                                <h4 className="font-medium text-slate-800">{lesson.title}</h4>
+                                <div className="flex items-center gap-2 text-xs text-slate-500">
+                                  <span className="material-symbols-outlined text-sm">{config.icon}</span>
+                                  <span>{config.label}</span>
+                                  {lesson.duration && <span>· {lesson.duration}</span>}
+                                </div>
+                              </div>
+                              <Link
+                                href={`/courses/${course.slug}/lessons/${lesson.id}`}
+                                className="rounded-lg border border-primary px-3 py-1 text-xs font-semibold text-primary hover:bg-primary/5"
+                              >
+                                学习
+                              </Link>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   ))}

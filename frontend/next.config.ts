@@ -18,6 +18,8 @@ const nextConfig: NextConfig = {
       destination: 'http://minio:9000/uploads/:path*',
     }];
   },
+  // 对于较老的 Next.js 版本，使用 transpilePackages 替代
+  transpilePackages: ["pdfjs-dist"],
 };
 
 export default nextConfig;

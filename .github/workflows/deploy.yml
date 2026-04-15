@@ -4,6 +4,10 @@ name: Deploy to Beijing Server
 on:
   push:
     branches: [ "main" ]
+    # 忽略文档变更，避免不必要的构建
+    paths-ignore:
+      - '**/*.md'              # 忽略所有层级的 Markdown 文件
+      - 'docs/**'              # 忽略整个文档文件夹
 
 jobs:
   # 任务一：构建并推送镜像

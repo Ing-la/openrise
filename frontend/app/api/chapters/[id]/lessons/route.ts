@@ -16,6 +16,27 @@ const createSchema = z.discriminatedUnion("type", [
     title: z.string().min(1, "请输入标题").max(100),
     content: z.string().min(1, "请输入内容"),
   }),
+  z.object({
+    type: z.literal("pdf"),
+    title: z.string().min(1, "请输入标题").max(100),
+    pdfUrl: z.string().refine(
+      (url) => url.startsWith('/uploads/') || z.string().url().safeParse(url).success,
+      "请输入有效的PDF链接（以 /uploads/ 开头的相对路径或完整URL）"
+    ),
+  }),
+  z.object({
+    type: z.literal("image"),
+    title: z.string().min(1, "请输入标题").max(100),
+    imageUrls: z.array(
+      z.string().min(1, "图片链接不能为空").refine(
+        (url) => {
+          const trimmed = url.trim();
+          return trimmed.startsWith('/uploads/') || z.string().url().safeParse(trimmed).success;
+        },
+        { message: "图片链接必须以 /uploads/ 开头或者是有效的URL" }
+      )
+    ).min(1, "至少上传一张图片"),
+  }),
 ]);
 
 export async function POST(
@@ -75,6 +96,33 @@ export async function POST(
       return NextResponse.json(lesson);
     }
 
+    if (parsed.data.type === "pdf") {
+      const lesson = await prisma.lesson.create({
+        data: {
+          type: "pdf",
+          title: parsed.data.title,
+          chapterId,
+          sortOrder: maxOrder + 1,
+          pdfUrl: parsed.data.pdfUrl,
+        },
+      });
+      return NextResponse.json(lesson);
+    }
+
+    if (parsed.data.type === "image") {
+      const lesson = await prisma.lesson.create({
+        data: {
+          type: "image",
+          title: parsed.data.title,
+          chapterId,
+          sortOrder: maxOrder + 1,
+          imageUrls: parsed.data.imageUrls,
+        },
+      });
+      return NextResponse.json(lesson);
+    }
+
+    // 默认为markdown
     const lesson = await prisma.lesson.create({
       data: {
         type: "markdown",
@@ -87,6 +135,14 @@ export async function POST(
     return NextResponse.json(lesson);
   } catch (e) {
     console.error("Create lesson error:", e);
-    return NextResponse.json({ error: "创建失败" }, { status: 500 });
+    console.error("Error details:", {
+      error: e instanceof Error ? e.message : String(e),
+      stack: e instanceof Error ? e.stack : undefined,
+      requestBody: body,
+      chapterId,
+      sessionUserId: session?.user?.id
+    });
+    const errorMessage = e instanceof Error ? e.message : "创建失败";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

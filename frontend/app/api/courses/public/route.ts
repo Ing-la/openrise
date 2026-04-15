@@ -31,7 +31,12 @@ export async function GET() {
         },
         _count: { select: { chapters: true } },
         chapters: {
-          include: { _count: { select: { lessons: true } } },
+          include: {
+            lessons: {
+              where: { isPublic: true }, // 只计算公开小节
+              select: { id: true }
+            }
+          }
         },
       },
       orderBy: { updatedAt: "desc" },
@@ -66,7 +71,7 @@ export async function GET() {
           isUserCourse: !isExampleCourse, // 示例课程不算用户创作
           isExampleCourse,
           chapterCount: c._count.chapters,
-          lessonCount: c.chapters.reduce((s, ch) => s + ch._count.lessons, 0),
+          lessonCount: c.chapters.reduce((s, ch) => s + ch.lessons.length, 0), // 只计算公开小节
           instructor: c.user
             ? {
                 name: c.user.name ?? "匿名",

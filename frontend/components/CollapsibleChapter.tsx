@@ -58,7 +58,16 @@ export default function CollapsibleChapter({
           {lessons.length > 0 ? (
             lessons.map((lesson, j) => {
               const canLink = isUserCourse && lesson.id;
-              const iconName = lesson.type === "markdown" ? "description" : "play_circle";
+              // 类型配置映射
+              const typeConfig = {
+                video: { icon: 'play_circle', label: '视频' },
+                markdown: { icon: 'description', label: '文档' },
+                pdf: { icon: 'picture_as_pdf', label: '文档' },
+                image: { icon: 'photo_library', label: '图片' }
+              } as const;
+              const iconName = lesson.type && typeConfig[lesson.type as keyof typeof typeConfig]
+                ? typeConfig[lesson.type as keyof typeof typeConfig].icon
+                : (lesson.type === 'markdown' ? 'description' : 'play_circle');
               const content = (
                 <>
                   <div className="flex items-center gap-3">

@@ -8,6 +8,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import VideoLesson from "@/app/account/lessons/[id]/VideoLesson";
 import MarkdownLesson from "@/app/account/lessons/[id]/MarkdownLesson";
+import PdfLesson from "@/app/account/lessons/[id]/PdfLesson";
+import ImageLesson from "@/app/account/lessons/[id]/ImageLesson";
 
 export async function generateMetadata({
   params,
@@ -85,7 +87,7 @@ export default async function PublicLessonPage({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-12">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-12">
         {/* 面包屑导航 */}
         <div className="mb-8 flex flex-col gap-2">
           <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -108,6 +110,14 @@ export default async function PublicLessonPage({
 
         {lesson.type === "markdown" && lesson.content && (
           <MarkdownLesson content={lesson.content} />
+        )}
+
+        {lesson.type === "pdf" && lesson.pdfUrl && (
+          <PdfLesson pdfUrl={lesson.pdfUrl} />
+        )}
+
+        {lesson.type === "image" && lesson.imageUrls && lesson.imageUrls.length > 0 && (
+          <ImageLesson imageUrls={lesson.imageUrls} />
         )}
 
         {/* 课程作者提示（如果是私有课程） */}

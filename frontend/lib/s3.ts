@@ -86,17 +86,18 @@ export async function deleteFile(key: string): Promise<void> {
 
 /**
  * 生成存储键（路径+文件名）
- * @param type 文件类型：avatar | cover
+ * @param type 文件类型：avatar | cover | pdf | image
  * @param userId 用户ID
  * @param originalName 原始文件名（用于提取扩展名）
  * @returns 存储键
  */
 export function generateKey(
-  type: "avatar" | "cover",
+  type: "avatar" | "cover" | "pdf" | "image",
   userId: string,
   originalName: string
 ): string {
-  const ext = originalName.split(".").pop() || "jpg";
+  // PDF使用固定扩展名.pdf，确保正确Content-Type
+  const ext = type === "pdf" ? "pdf" : originalName.split(".").pop() || "jpg";
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 8);
   return `${type}/${userId}-${timestamp}-${random}.${ext}`;
@@ -127,7 +128,7 @@ export async function initializeBucket(): Promise<void> {
     // 检查bucket是否存在
     const listCommand = new ListBucketsCommand({});
     const buckets = await s3Client.send(listCommand);
-    const bucketExists = buckets.Buckets?.some(b => b.Name === bucket) || false;
+    const bucketExists = buckets.Buckets?.some((b: any) => b.Name === bucket) || false;
 
     if (!bucketExists) {
       console.log(`创建MinIO存储桶: ${bucket}`);

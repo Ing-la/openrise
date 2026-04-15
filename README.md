@@ -47,7 +47,7 @@ cd openrise
 
 # 2. 配置环境变量
 cp .env.example .env
-cp frontend/.env.example frontend/.env
+cp frontend/.env.example frontend/.env.local
 # 编辑 .env 文件，根据需要修改数据库密码等配置
 
 # 3. 构建并启动所有服务
@@ -90,6 +90,26 @@ npm run dev
 ```
 
 访问 http://localhost:3000
+
+### 一键启动脚本（推荐）
+
+对于 Windows 开发环境，项目提供了便捷的 PowerShell 启动脚本：
+
+```powershell
+# 在项目根目录执行
+.\start-dev.ps1
+```
+
+脚本会自动：
+1. 启动 PostgreSQL 和 MinIO 容器
+2. 等待容器健康检查
+3. 安装前端依赖（如果需要）
+4. 启动 Next.js 开发服务器
+
+支持参数：
+- `-SkipDocker`：仅启动前端（假设容器已在运行）
+- `-SkipFrontend`：仅启动容器
+- `-Help`：显示帮助信息
 
 ## 服务架构
 
@@ -188,7 +208,7 @@ ai-web-community/
 | `MINIO_REGION` | 存储区域 | 空 |
 | `MINIO_USE_SSL` | 是否使用 SSL | `false` |
 
-完整配置见 `.env.example` 和 `frontend/.env.example`
+完整配置见 `.env.example` 和 `frontend/.env.example`（开发时复制为 `frontend/.env.local`）
 
 ## 部署说明
 
@@ -223,7 +243,7 @@ ai-web-community/
 | [📋 项目架构](docs/project-architecture.md) | 系统整体架构、技术栈、服务设计 |
 | [🧭 代码库指南](docs/codebase-guide.md) | 代码组织、常见修改模式、开发工作流 |
 | [🎛️ UI功能开关](docs/ui-feature-flags.md) | 条件渲染、功能开关、隐藏元素管理 |
-| [🚀 开发指南](DEVELOPMENT.md) | 本地开发环境设置、部署流程 |
+| [🚀 开发指南](DEV_GUIDE.md) | 本地开发环境设置、部署流程 |
 
 最新更新（2026-04-09）：
 - 首页隐藏了定价链接和会员CTA模块（通过 `showPricing` 和 `showMembershipCTA` 开关控制）

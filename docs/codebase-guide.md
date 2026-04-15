@@ -178,13 +178,20 @@ npm run dev
 # 访问 http://localhost:3000
 ```
 
+**一键启动脚本（Windows）**：
+对于 Windows 开发环境，可以使用项目根目录的 PowerShell 脚本：
+```powershell
+.\start-dev.ps1
+```
+脚本会自动启动所有依赖服务并启动前端开发服务器。支持参数：`-SkipDocker`、`-SkipFrontend`、`-Help`。
+
 ### 2. 数据库操作
 ```bash
 # 进入数据库容器
 docker-compose exec db psql -U openrise -d openrise
 
 # Prisma Studio（可视化数据）
-npx prisma studio
+npm run studio
 
 # 重置开发数据库
 npx prisma migrate reset
@@ -327,4 +334,4 @@ return NextResponse.json(
 **相关文档**: 
 - `docs/project-architecture.md` - 项目架构
 - `docs/ui-feature-flags.md` - 功能开关管理
-- `DEVELOPMENT.md` - 开发环境设置
+- `DEV_GUIDE.md` - 开发环境设置

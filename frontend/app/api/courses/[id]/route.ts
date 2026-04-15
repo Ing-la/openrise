@@ -93,3 +93,35 @@ export async function PATCH(
     return NextResponse.json({ error: "更新失败" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "请先登录" }, { status: 401 });
+  }
+
+  const { id } = await params;
+
+  // 验证课程所有权
+  const course = await prisma.course.findFirst({
+    where: { id, userId: session.user.id },
+  });
+  if (!course) {
+    return NextResponse.json({ error: "课程不存在或无权删除" }, { status: 404 });
+  }
+
+  try {
+    // 使用级联删除，自动删除相关章节和小节
+    await prisma.course.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (e) {
+    console.error("Delete course error:", e);
+    return NextResponse.json({ error: "删除失败" }, { status: 500 });
+  }
+}

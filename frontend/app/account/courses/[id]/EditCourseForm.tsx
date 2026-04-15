@@ -24,6 +24,7 @@ export default function EditCourseForm({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   async function handleCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -142,21 +143,68 @@ export default function EditCourseForm({
               <span>讲师：{course.user.name ?? "未设置"}</span>
             </div>
           )}
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className="mt-4 rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/5"
-          >
-            编辑课程信息
-          </button>
+          {error && (
+            <div className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={() => setOpen(true)}
+              className="rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/5"
+            >
+              编辑课程信息
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                if (!confirm(`确定要删除课程 "${course.title}" 吗？此操作不可撤销，将删除所有章节和小节内容。`)) {
+                  return;
+                }
+
+                setError("");
+                setDeleting(true);
+                try {
+                  const res = await fetch(`/api/courses/${course.id}`, {
+                    method: "DELETE",
+                  });
+                  const data = await res.json();
+                  if (!res.ok) throw new Error(data.error ?? "删除失败");
+
+                  // 删除成功后跳转到课程列表
+                  router.push("/account");
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "删除失败");
+                  setTimeout(() => setError(""), 5000);
+                } finally {
+                  setDeleting(false);
+                }
+              }}
+              disabled={deleting}
+              className="rounded-lg border border-red-300 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 disabled:opacity-50"
+            >
+              {deleting ? "删除中..." : "删除课程"}
+            </button>
+          </div>
         </div>
       </div>
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
-            <h3 className="mb-4 text-lg font-bold text-slate-900">编辑课程</h3>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="max-h-[95vh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">编辑课程</h3>
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                aria-label="关闭"
+              >
+                <span className="material-symbols-outlined text-xl">close</span>
+              </button>
+            </div>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
               {error && (
                 <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">
                   {error}
@@ -242,6 +290,7 @@ export default function EditCourseForm({
                   {loading ? "保存中..." : "保存"}
                 </button>
               </div>
+
             </form>
           </div>
         </div>

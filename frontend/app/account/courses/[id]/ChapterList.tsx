@@ -32,6 +32,14 @@ export default function ChapterList({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // 类型配置映射
+  const typeConfig = {
+    video: { icon: 'play_circle', label: '视频' },
+    markdown: { icon: 'description', label: '文档' },
+    pdf: { icon: 'picture_as_pdf', label: '文档' },
+    image: { icon: 'photo_library', label: '图片' }
+  } as const;
+
   const toggleChapter = (id: string) => {
     setExpanded((p) => ({ ...p, [id]: !p[id] }));
   };
@@ -55,6 +63,24 @@ export default function ChapterList({
       setError(err instanceof Error ? err.message : "创建失败");
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDeleteChapter(chapterId: string, chapterTitle: string) {
+    if (!confirm(`确定要删除章节 "${chapterTitle}" 吗？此操作不可撤销，将同时删除章节中的所有小节。`)) {
+      return;
+    }
+
+    setError("");
+    try {
+      const res = await fetch(`/api/chapters/${chapterId}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "删除失败");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "删除失败");
     }
   }
 
@@ -137,6 +163,17 @@ export default function ChapterList({
                   >
                     添加小节
                   </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDeleteChapter(chapter.id, chapter.title);
+                    }}
+                    className="rounded-lg border border-red-300 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50"
+                  >
+                    删除章节
+                  </button>
                   <span className="material-symbols-outlined text-primary transition-transform group-open:rotate-180">
                     expand_more
                   </span>
@@ -169,7 +206,7 @@ export default function ChapterList({
                       >
                         <div className="flex items-center gap-3">
                           <span className="material-symbols-outlined text-slate-400">
-                            {lesson.type === "video" ? "play_circle" : "description"}
+                            {typeConfig[lesson.type as keyof typeof typeConfig]?.icon || 'description'}
                           </span>
                           <span className="font-medium text-slate-700">
                             {lesson.title}
@@ -200,13 +237,18 @@ function AddLessonForm({
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  const [type, setType] = useState<"video" | "markdown">("video");
+  const [type, setType] = useState<"video" | "markdown" | "pdf" | "image">("video");
   const [title, setTitle] = useState("");
   const [videoUrl, setVideoUrl] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isDragging, setIsDragging] = useState(false);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [pdfUploading, setPdfUploading] = useState(false);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [imageUploading, setImageUploading] = useState(false);
 
   async function handleMarkdownFile(file: File) {
     if (!file.name.toLowerCase().endsWith(".md") && !file.name.toLowerCase().endsWith(".markdown")) {
@@ -223,17 +265,120 @@ function AddLessonForm({
     }
   }
 
+  async function handlePdfFile(file: File) {
+    // 验证文件类型
+    if (!file.type.includes("pdf") && !file.name.toLowerCase().endsWith(".pdf")) {
+      setError("请拖入 PDF 文件");
+      return;
+    }
+    // 验证文件大小 (50MB)
+    if (file.size > 50 * 1024 * 1024) {
+      setError("PDF 文件大小不超过 50MB");
+      return;
+    }
+    setPdfFile(file);
+    if (!title) setTitle(file.name.replace(/\.pdf$/i, ""));
+    setError("");
+  }
+
+  async function handleImageFiles(files: FileList) {
+    const newFiles: File[] = [];
+    const errors: string[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      // 验证文件类型
+      if (!file.type.startsWith("image/") && !/\.(jpe?g|png|webp)$/i.test(file.name)) {
+        errors.push(`${file.name}: 仅支持 JPG, PNG, WebP 格式`);
+        continue;
+      }
+      // 验证文件大小 (20MB)
+      if (file.size > 20 * 1024 * 1024) {
+        errors.push(`${file.name}: 图片大小不超过 20MB`);
+        continue;
+      }
+      newFiles.push(file);
+    }
+
+    if (errors.length > 0) {
+      setError(errors.join("; "));
+    }
+
+    if (newFiles.length > 0) {
+      setImageFiles(prev => [...prev, ...newFiles]);
+      if (!title && newFiles.length === 1) {
+        setTitle(newFiles[0].name.replace(/\.[^/.]+$/, ""));
+      }
+    }
+  }
+
+  async function uploadPdfFile(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", "pdf");
+
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error ?? "上传失败");
+    }
+
+    const data = await response.json();
+    return data.url;
+  }
+
+  async function uploadImageFile(file: File): Promise<string> {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("type", "image");
+
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error ?? "上传失败");
+    }
+
+    const data = await response.json();
+    return data.url;
+  }
+
+  async function deleteUploadedImage(key: string): Promise<void> {
+    const response = await fetch(`/api/upload?key=${encodeURIComponent(key)}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error ?? "删除失败");
+    }
+  }
+
   function handleDrop(e: React.DragEvent) {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file && type === "markdown") handleMarkdownFile(file);
+    const files = e.dataTransfer.files;
+    if (!files || files.length === 0) return;
+    if (type === "markdown") {
+      handleMarkdownFile(files[0]);
+    } else if (type === "pdf") {
+      handlePdfFile(files[0]);
+    } else if (type === "image") {
+      handleImageFiles(files);
+    }
   }
 
   function handleDragOver(e: React.DragEvent) {
     e.preventDefault();
-    if (type === "markdown") setIsDragging(true);
+    if (type === "markdown" || type === "pdf" || type === "image") setIsDragging(true);
   }
 
   function handleDragLeave() {
@@ -244,23 +389,75 @@ function AddLessonForm({
     e.preventDefault();
     setError("");
     setLoading(true);
+
     try {
+      let pdfUrl = "";
+
+      // 如果是PDF类型，先上传文件
+      if (type === "pdf") {
+        if (!pdfFile) {
+          throw new Error("请选择PDF文件");
+        }
+        setPdfUploading(true);
+        try {
+          pdfUrl = await uploadPdfFile(pdfFile);
+        } catch (err) {
+          throw new Error(`PDF上传失败: ${err instanceof Error ? err.message : "未知错误"}`);
+        } finally {
+          setPdfUploading(false);
+        }
+      }
+
+      // 如果是图片类型，先上传所有图片文件
+      let uploadedImageUrls: string[] = [];
+      if (type === "image") {
+        if (imageFiles.length === 0) {
+          throw new Error("请至少选择一张图片");
+        }
+        setImageUploading(true);
+        try {
+          uploadedImageUrls = await Promise.all(
+            imageFiles.map(file => uploadImageFile(file))
+          );
+          console.log("上传的图片URLs:", JSON.stringify(uploadedImageUrls, null, 2));
+        } catch (err) {
+          throw new Error(`图片上传失败: ${err instanceof Error ? err.message : "未知错误"}`);
+        } finally {
+          setImageUploading(false);
+        }
+      }
+
       const body =
         type === "video"
           ? { type: "video", title, videoUrl }
-          : { type: "markdown", title, content };
+          : type === "markdown"
+          ? { type: "markdown", title, content }
+          : type === "pdf"
+          ? { type: "pdf", title, pdfUrl }
+          : { type: "image", title, imageUrls: uploadedImageUrls };
+
+      console.log("创建小节请求体:", JSON.stringify(body, null, 2));
       const res = await fetch(`/api/chapters/${chapterId}/lessons`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "添加失败");
+      if (!res.ok) {
+        console.error("创建API失败:", { status: res.status, data });
+        throw new Error(data.error ?? "添加失败");
+      }
+
+      // 重置表单
       setTitle("");
       setVideoUrl("");
       setContent("");
+      setPdfFile(null);
+      setImageFiles([]);
+      setImageUrls([]);
       onSuccess();
     } catch (err) {
+      console.error("创建小节失败:", err);
       setError(err instanceof Error ? err.message : "添加失败");
     } finally {
       setLoading(false);
@@ -287,6 +484,24 @@ function AddLessonForm({
             onChange={() => setType("markdown")}
           />
           <span>Markdown 文档</span>
+        </label>
+        <label className="flex items-center gap-2">
+          <input
+            type="radio"
+            name="type"
+            checked={type === "pdf"}
+            onChange={() => setType("pdf")}
+          />
+          <span>PDF 文档</span>
+        </label>
+        <label className="flex items-center gap-2">
+          <input
+            type="radio"
+            name="type"
+            checked={type === "image"}
+            onChange={() => setType("image")}
+          />
+          <span>图片</span>
         </label>
       </div>
 
@@ -339,15 +554,172 @@ function AddLessonForm({
         </label>
       )}
 
+      {type === "pdf" && (
+        <label className="mb-3 block">
+          <span className="text-sm font-medium text-slate-700">PDF 文件 *</span>
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            className={`mt-1 rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors ${
+              isDragging ? "border-primary bg-primary/5" : "border-slate-200"
+            } ${pdfFile ? "border-green-200 bg-green-50" : ""}`}
+          >
+            {pdfFile ? (
+              <div className="flex flex-col items-center">
+                <span className="material-symbols-outlined text-green-600 text-3xl">
+                  picture_as_pdf
+                </span>
+                <p className="mt-2 font-medium text-green-700">{pdfFile.name}</p>
+                <p className="mt-1 text-sm text-green-600">
+                  {(pdfFile.size / 1024 / 1024).toFixed(2)} MB
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setPdfFile(null)}
+                  className="mt-3 text-sm text-red-600 hover:text-red-800"
+                >
+                  移除文件
+                </button>
+              </div>
+            ) : (
+              <>
+                <span className="material-symbols-outlined text-slate-400 text-3xl">
+                  upload
+                </span>
+                <p className="mt-2 text-slate-700">拖入 PDF 文件，或点击选择</p>
+                <p className="mt-1 text-sm text-slate-500">支持 .pdf 格式，最大 50MB</p>
+                <input
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handlePdfFile(file);
+                  }}
+                  className="mt-3 hidden"
+                  id="pdf-upload"
+                />
+                <button
+                  type="button"
+                  onClick={() => document.getElementById("pdf-upload")?.click()}
+                  className="mt-3 rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/5"
+                >
+                  选择文件
+                </button>
+              </>
+            )}
+          </div>
+        </label>
+      )}
+
+      {type === "image" && (
+        <label className="mb-3 block">
+          <span className="text-sm font-medium text-slate-700">图片 *</span>
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            className={`mt-1 rounded-lg border-2 border-dashed px-4 py-6 text-center transition-colors ${
+              isDragging ? "border-primary bg-primary/5" : "border-slate-200"
+            }`}
+          >
+            {/* 图片预览列表 */}
+            {imageFiles.length > 0 ? (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                  {imageFiles.map((file, index) => (
+                    <div key={index} className="relative rounded-lg border border-slate-200 bg-white p-2">
+                      <div className="aspect-square overflow-hidden rounded-md bg-slate-100">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={file.name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="mt-2 truncate text-xs font-medium text-slate-700">{file.name}</div>
+                      <div className="mt-1 text-xs text-slate-500">
+                        {(file.size / 1024 / 1024).toFixed(2)} MB
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImageFiles(files => files.filter((_, i) => i !== index));
+                        }}
+                        className="absolute -right-2 -top-2 flex size-5 items-center justify-center rounded-full bg-red-500 text-xs text-white hover:bg-red-600"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-center gap-3">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      if (files) handleImageFiles(files);
+                    }}
+                    className="hidden"
+                    id="image-upload-multiple"
+                    multiple
+                  />
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById("image-upload-multiple")?.click()}
+                    className="rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/5"
+                  >
+                    继续添加图片
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setImageFiles([])}
+                    className="rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                  >
+                    清空所有
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <span className="material-symbols-outlined text-slate-400 text-3xl">
+                  photo_library
+                </span>
+                <p className="mt-2 text-slate-700">拖入图片文件，或点击选择</p>
+                <p className="mt-1 text-sm text-slate-500">支持 JPG、PNG、WebP 格式，每张不超过 20MB</p>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(e) => {
+                    const files = e.target.files;
+                    if (files) handleImageFiles(files);
+                  }}
+                  className="mt-3 hidden"
+                  id="image-upload"
+                  multiple
+                />
+                <button
+                  type="button"
+                  onClick={() => document.getElementById("image-upload")?.click()}
+                  className="mt-3 rounded-lg border border-primary px-4 py-2 text-sm font-semibold text-primary hover:bg-primary/5"
+                >
+                  选择图片
+                </button>
+              </>
+            )}
+          </div>
+        </label>
+      )}
+
       {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
 
       <div className="flex gap-3">
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || pdfUploading || imageUploading}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-50"
         >
-          {loading ? "添加中..." : "添加"}
+          {loading || pdfUploading || imageUploading ? "添加中..." : "添加"}
         </button>
         <button
           type="button"

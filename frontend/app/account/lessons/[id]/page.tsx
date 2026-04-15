@@ -6,6 +6,10 @@ import AuthButton from "@/components/AuthButton";
 import { prisma } from "@/lib/prisma";
 import VideoLesson from "./VideoLesson";
 import MarkdownLesson from "./MarkdownLesson";
+import PdfLesson from "./PdfLesson";
+import ImageLesson from "./ImageLesson";
+import ImageManager from "./ImageManager";
+import LessonActions from "./LessonActions";
 
 export async function generateMetadata({
   params,
@@ -59,7 +63,7 @@ export default async function LessonPage({
           </Link>
           <div className="flex items-center gap-4">
             <Link
-              href={`/courses/${courseId}`}
+              href={`/account/courses/${courseId}`}
               className="text-sm font-semibold text-slate-600 transition-colors hover:text-primary"
             >
               返回课程
@@ -69,8 +73,9 @@ export default async function LessonPage({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-12">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-12">
         <h1 className="mb-8 text-2xl font-bold text-slate-900">{lesson.title}</h1>
+        <LessonActions lesson={lesson} />
 
         {lesson.type === "video" && lesson.videoUrl && (
           <VideoLesson url={lesson.videoUrl} platform={lesson.platform ?? "bilibili"} />
@@ -78,6 +83,17 @@ export default async function LessonPage({
 
         {lesson.type === "markdown" && lesson.content && (
           <MarkdownLesson content={lesson.content} />
+        )}
+
+        {lesson.type === "pdf" && lesson.pdfUrl && (
+          <PdfLesson pdfUrl={lesson.pdfUrl} />
+        )}
+
+        {lesson.type === "image" && lesson.imageUrls && lesson.imageUrls.length > 0 && (
+          <ImageLesson imageUrls={lesson.imageUrls} />
+        )}
+        {lesson.type === "image" && (
+          <ImageManager lessonId={lesson.id} initialImageUrls={lesson.imageUrls || []} />
         )}
       </main>
     </div>

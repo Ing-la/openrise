@@ -81,20 +81,30 @@ export async function canViewLesson(lessonId: string, userId?: string): Promise<
 
   const course = lesson.chapter.course;
 
-  // 公开课程任何人都可以查看
-  if (course.isPublic) return true;
-
-  // 私有课程需要用户ID
+  // 获取当前用户ID
   let currentUserId = userId;
   if (!currentUserId) {
     const session = await getServerSession(authOptions);
     currentUserId = session?.user?.id;
   }
 
-  if (!currentUserId) return false;
+  // 如果是课程作者，可以查看所有小节（无论课程或小节的公开状态）
+  if (currentUserId && course.userId === currentUserId) {
+    return true;
+  }
 
-  // 私有课程仅作者可查看
-  return course.userId === currentUserId;
+  // 课程私有：只有作者能查看（上面已检查）
+  if (!course.isPublic) {
+    return false;
+  }
+
+  // 课程公开，但小节私有：只有作者能查看（上面已检查）
+  if (!lesson.isPublic) {
+    return false;
+  }
+
+  // 课程公开且小节公开：所有人都能查看
+  return true;
 }
 
 /**
