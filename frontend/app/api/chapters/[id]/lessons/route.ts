@@ -58,8 +58,9 @@ export async function POST(
     return NextResponse.json({ error: "章节不存在" }, { status: 404 });
   }
 
+  let body: unknown = null;
   try {
-    const body = await request.json();
+    body = await request.json();
     const parsed = createSchema.safeParse(body);
     if (!parsed.success) {
       return NextResponse.json(
