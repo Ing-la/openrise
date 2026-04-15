@@ -6,14 +6,27 @@ WORKDIR /app
 # 设置构建时环境变量（避免 Prisma 初始化错误）
 ENV DATABASE_URL="postgresql://dummy:password@localhost:5432/dummy"
 
+# 安装系统依赖（canvas等原生模块需要）
+RUN apk add --no-cache \
+    python3 \
+    pkgconfig \
+    cairo-dev \
+    pango-dev \
+    libjpeg-turbo-dev \
+    giflib-dev \
+    librsvg-dev \
+    build-base \
+    g++ \
+    make
+
 # 复制依赖文件
 COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
 
 # 复制 Prisma schema（postinstall 会执行 prisma generate，需先有 schema）
 COPY prisma ./prisma
 
-# 安装依赖（兼容 npm/yarn/pnpm）
-RUN npm install
+# 安装依赖（使用npm ci确保与lockfile一致）
+RUN npm ci
 
 # 复制源码
 COPY . .
@@ -27,6 +40,14 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# 安装运行时依赖（canvas需要）
+RUN apk add --no-cache \
+    cairo \
+    pango \
+    libjpeg-turbo \
+    giflib \
+    librsvg
 
 # 创建非 root 用户
 RUN addgroup --system --gid 1001 nodejs
