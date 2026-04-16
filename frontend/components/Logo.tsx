@@ -15,7 +15,7 @@ export default function Logo({
   const img = (
     <Image
       src="/images/logo.jpg"
-      alt="Zero One"
+      alt="零壹"
       width={size}
       height={size}
       className={`shrink-0 rounded-lg ${className}`}

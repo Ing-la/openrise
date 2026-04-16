@@ -4,8 +4,8 @@ import Image from "next/image";
 import { verifyToken } from "@/lib/verify";
 
 export const metadata: Metadata = {
-  title: "验证邮箱 | Zero One",
-  description: "验证你的 Zero One 邮箱",
+  title: "验证邮箱 | 零壹",
+  description: "验证你的 零壹 邮箱",
 };
 
 export default async function VerifyPage({
@@ -84,14 +84,14 @@ function VerifyLayout({ children }: { children: React.ReactNode }) {
           <div className="flex shrink-0 items-center justify-center rounded-xl border border-gray-200/90 shadow-sm">
             <Image
               src="/images/logo.jpg"
-              alt="Zero One"
+              alt="零壹"
               width={42}
               height={42}
               className="rounded-lg"
             />
           </div>
           <h2 className="text-xl font-bold tracking-tight">
-            Zero One
+            零壹
           </h2>
         </Link>
       </header>

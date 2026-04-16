@@ -23,20 +23,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
     if (!course) {
       return {
-        title: "课程不存在 | Zero One",
+        title: "课程不存在 | 零壹",
         description: "请求的课程不存在或无权访问",
       };
     }
 
     return {
-      title: `${course.title} | Zero One`,
-      description: course.description || "Zero One 课程",
+      title: `${course.title} | 零壹`,
+      description: course.description || "零壹 课程",
     };
   } catch (error) {
     console.error('Failed to generate metadata for course:', error);
     return {
-      title: "课程 | Zero One",
-      description: "Zero One 课程",
+      title: "课程 | 零壹",
+      description: "零壹 课程",
     };
   }
 }
@@ -55,7 +55,7 @@ export default async function CourseDetailPage({ params }: Props) {
     notFound();
   }
 
-  const isOwner = userId && course.instructor?.name === "Zero One官方" ? false : userId ? await CourseService.isCourseOwner(slug, userId) : false;
+  const isOwner = userId && course.instructor?.name === "零壹官方" ? false : userId ? await CourseService.isCourseOwner(slug, userId) : false;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -65,7 +65,7 @@ export default async function CourseDetailPage({ params }: Props) {
           <div className="flex items-center gap-3">
             <Logo size={42} variant="header" />
             <Link href="/" className="text-xl font-bold tracking-tight hover:text-primary transition-colors">
-              Zero One
+              零壹
             </Link>
           </div>
           <nav className="hidden md:flex items-center gap-10">
@@ -248,7 +248,7 @@ export default async function CourseDetailPage({ params }: Props) {
             <div className="flex items-center gap-3">
               <Logo size={42} variant="header" />
               <Link href="/" className="text-xl font-bold tracking-tight hover:text-primary transition-colors">
-                Zero One
+                零壹
               </Link>
             </div>
             <div className="flex items-center gap-4">

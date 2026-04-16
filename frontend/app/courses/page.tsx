@@ -8,8 +8,8 @@ import AuthButton from "@/components/AuthButton";
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: "内容库 | Zero One",
-  description: "Zero One 精选 AI 实战内容，零门槛学习，场景实战，成果可见。",
+  title: "内容库 | 零壹",
+  description: "零壹 精选 AI 实战内容，零门槛学习，场景实战，成果可见。",
 };
 
 export default async function CoursesPage() {
@@ -27,7 +27,7 @@ export default async function CoursesPage() {
           <div className="flex items-center gap-3">
             <Logo size={42} variant="header" />
             <Link href="/" className="text-xl font-bold tracking-tight hover:text-primary transition-colors">
-              Zero One
+              零壹
             </Link>
           </div>
           <nav className="hidden md:flex items-center gap-10">
@@ -136,7 +136,7 @@ export default async function CoursesPage() {
             <div className="flex items-center gap-3">
               <Logo size={42} variant="header" />
               <Link href="/" className="text-xl font-bold tracking-tight hover:text-primary transition-colors">
-                Zero One
+                零壹
               </Link>
             </div>
             <div className="flex items-center gap-4">

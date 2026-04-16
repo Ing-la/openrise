@@ -10,7 +10,7 @@ import { Providers } from "@/components/providers";
 // });
 
 export const metadata: Metadata = {
-  title: "Zero One | 用 AI 帮助普通人成长",
+  title: "零壹 | 用 AI 帮助普通人成长",
   description:
     "帮助 99% 的普通人掌握 AI 应用能力。零门槛学习，场景实战，从「会聊天」到「会应用」，通过实践成长为建造者。",
 };
@@ -23,10 +23,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
-          rel="stylesheet"
-        />
+        <link href="/fonts.css" rel="stylesheet" />
       </head>
       <body
         className="font-sans text-slate-500 antialiased overflow-x-hidden bg-cream"

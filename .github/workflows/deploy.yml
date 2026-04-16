@@ -13,11 +13,22 @@ jobs:
   # 任务一：构建并推送镜像
   build-and-push:
     runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.git_hash.outputs.hash }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 1. 登录阿里云私有仓库
+      # 1. 获取Git短哈希（7位）
+      - name: Get Git Short Hash
+        id: git_hash
+        run: |
+          SHORT_HASH=$(git rev-parse --short=7 HEAD)
+          echo "IMAGE_TAG=${SHORT_HASH}" >> $GITHUB_ENV
+          echo "hash=${SHORT_HASH}" >> $GITHUB_OUTPUT
+          echo "Git短哈希: ${SHORT_HASH}"
+
+      # 2. 登录阿里云私有仓库
       - name: Login to ACR
         uses: aliyun/acr-login@v1
         with:
@@ -25,12 +36,24 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      # 2. 构建 Docker 镜像并推送到阿里云
+      # 3. 构建 Docker 镜像并推送到阿里云（双标签推送）
       - name: Build and Push Image
         run: |
           # 注意：这里的 01-builders/01-builders 是根据你阿里云截图设置的
           # Dockerfile在frontend目录，构建上下文需要指向该目录
-          docker build -t ${{ secrets.ACR_REGISTRY }}/01-builders/01-builders:latest ./frontend
+
+          # 构建带Git哈希的版本标签
+          docker build -t ${{ secrets.ACR_REGISTRY }}/01-builders/01-builders:${{ env.IMAGE_TAG }} ./frontend
+
+          # 添加latest标签（指向相同镜像）
+          docker tag ${{ secrets.ACR_REGISTRY }}/01-builders/01-builders:${{ env.IMAGE_TAG }} \
+                     ${{ secrets.ACR_REGISTRY }}/01-builders/01-builders:latest
+
+          # 推送两个标签到阿里云ACR
+          echo "推送带哈希版本: ${{ secrets.ACR_REGISTRY }}/01-builders/01-builders:${{ env.IMAGE_TAG }}"
+          docker push ${{ secrets.ACR_REGISTRY }}/01-builders/01-builders:${{ env.IMAGE_TAG }}
+
+          echo "推送latest版本: ${{ secrets.ACR_REGISTRY }}/01-builders/01-builders:latest"
           docker push ${{ secrets.ACR_REGISTRY }}/01-builders/01-builders:latest
 
   # 任务二：远程指挥服务器拉取并重启
@@ -53,8 +76,8 @@ jobs:
             # 2. 在服务器上重新登录一次阿里云 (确保万无一失)
             docker login --username=${{ secrets.ACR_USERNAME }} --password=${{ secrets.ACR_PASSWORD }} ${{ secrets.ACR_REGISTRY }}
 
-            # 3. 更新.env中的镜像地址
-            sed -i "s|^FRONTEND_IMAGE=.*|FRONTEND_IMAGE=${{ secrets.ACR_REGISTRY }}/01-builders/01-builders:latest|" .env
+            # 3. 更新.env中的镜像地址（使用具体Git哈希版本，支持秒级回滚）
+            sed -i "s|^FRONTEND_IMAGE=.*|FRONTEND_IMAGE=${{ secrets.ACR_REGISTRY }}/01-builders/01-builders:${{ needs.build-and-push.outputs.image_tag }}|" .env
 
             # 4. 使用docker compose拉取并重启服务（指定production profile）
             docker compose --profile production pull frontend

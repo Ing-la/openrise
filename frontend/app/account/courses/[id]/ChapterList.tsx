@@ -322,13 +322,40 @@ function AddLessonForm({
       body: formData,
     });
 
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error ?? "上传失败");
+    // 尝试解析响应，处理可能的非JSON响应（如Nginx错误页面）
+    let responseData;
+    try {
+      const responseText = await response.text();
+      // 尝试解析JSON
+      try {
+        responseData = JSON.parse(responseText);
+      } catch (jsonError) {
+        // 如果不是JSON，可能是HTML错误页面
+        if (!response.ok) {
+          // 检查是否为413错误（请求体过大）
+          if (response.status === 413) {
+            throw new Error("文件大小超过服务器限制（最大50MB），请压缩PDF或使用更小的文件");
+          }
+          // 其他错误，返回原始文本或默认消息
+          const errorText = responseText.length > 200 ? responseText.substring(0, 200) + "..." : responseText;
+          throw new Error(`上传失败: 服务器返回错误 (${response.status}) - ${errorText}`);
+        }
+        // 如果response.ok但非JSON，这是异常情况
+        throw new Error("服务器返回了无效的响应格式");
+      }
+    } catch (error) {
+      // 如果连text()都失败，使用状态码信息
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(`上传失败: ${response.status} ${response.statusText}`);
     }
 
-    const data = await response.json();
-    return data.url;
+    if (!response.ok) {
+      throw new Error(responseData?.error ?? `上传失败: ${response.status} ${response.statusText}`);
+    }
+
+    return responseData.url;
   }
 
   async function uploadImageFile(file: File): Promise<string> {
@@ -341,13 +368,40 @@ function AddLessonForm({
       body: formData,
     });
 
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error ?? "上传失败");
+    // 尝试解析响应，处理可能的非JSON响应（如Nginx错误页面）
+    let responseData;
+    try {
+      const responseText = await response.text();
+      // 尝试解析JSON
+      try {
+        responseData = JSON.parse(responseText);
+      } catch (jsonError) {
+        // 如果不是JSON，可能是HTML错误页面
+        if (!response.ok) {
+          // 检查是否为413错误（请求体过大）
+          if (response.status === 413) {
+            throw new Error("文件大小超过服务器限制（最大50MB），请压缩图片或使用更小的文件");
+          }
+          // 其他错误，返回原始文本或默认消息
+          const errorText = responseText.length > 200 ? responseText.substring(0, 200) + "..." : responseText;
+          throw new Error(`上传失败: 服务器返回错误 (${response.status}) - ${errorText}`);
+        }
+        // 如果response.ok但非JSON，这是异常情况
+        throw new Error("服务器返回了无效的响应格式");
+      }
+    } catch (error) {
+      // 如果连text()都失败，使用状态码信息
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error(`上传失败: ${response.status} ${response.statusText}`);
     }
 
-    const data = await response.json();
-    return data.url;
+    if (!response.ok) {
+      throw new Error(responseData?.error ?? `上传失败: ${response.status} ${response.statusText}`);
+    }
+
+    return responseData.url;
   }
 
   async function deleteUploadedImage(key: string): Promise<void> {
@@ -356,8 +410,27 @@ function AddLessonForm({
     });
 
     if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error ?? "删除失败");
+      // 尝试解析响应，处理可能的非JSON响应
+      let errorData;
+      try {
+        const responseText = await response.text();
+        // 尝试解析JSON
+        try {
+          errorData = JSON.parse(responseText);
+        } catch (jsonError) {
+          // 如果不是JSON，使用状态码信息
+          const errorText = responseText.length > 200 ? responseText.substring(0, 200) + "..." : responseText;
+          throw new Error(`删除失败: 服务器返回错误 (${response.status}) - ${errorText}`);
+        }
+      } catch (error) {
+        // 如果连text()都失败，使用状态码信息
+        if (error instanceof Error) {
+          throw error;
+        }
+        throw new Error(`删除失败: ${response.status} ${response.statusText}`);
+      }
+
+      throw new Error(errorData?.error ?? `删除失败: ${response.status} ${response.statusText}`);
     }
   }
 

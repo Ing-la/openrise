@@ -3,7 +3,7 @@ import { Resend } from "resend";
 // 构建时可能无 env，传占位符避免 Resend 构造函数报错；运行时由 docker-compose 注入真实值
 const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder");
 
-const FROM = process.env.RESEND_FROM ?? "Zero One <onboarding@resend.dev>";
+const FROM = process.env.RESEND_FROM ?? "零壹 <onboarding@resend.dev>";
 
 export async function sendVerificationEmail(to: string, name: string, token: string) {
   const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
@@ -12,10 +12,10 @@ export async function sendVerificationEmail(to: string, name: string, token: str
   const { data, error } = await resend.emails.send({
     from: FROM,
     to,
-    subject: "验证你的 Zero One 邮箱",
+    subject: "验证你的 零壹 邮箱",
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2 style="color: #064e3b;">欢迎加入 Zero One</h2>
+        <h2 style="color: #064e3b;">欢迎加入 零壹</h2>
         <p>你好，${name}！</p>
         <p>请点击下方按钮验证你的邮箱，完成注册：</p>
         <p style="margin: 24px 0;">
@@ -23,7 +23,7 @@ export async function sendVerificationEmail(to: string, name: string, token: str
         </p>
         <p style="color: #64748b; font-size: 14px;">链接 24 小时内有效。若未注册请忽略此邮件。</p>
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
-        <p style="color: #94a3b8; font-size: 12px;">Zero One · 用 AI 帮助普通人成长</p>
+        <p style="color: #94a3b8; font-size: 12px;">零壹 · 用 AI 帮助普通人成长</p>
       </div>
     `,
   });
@@ -42,7 +42,7 @@ export async function sendPasswordResetEmail(to: string, name: string, token: st
   const { data, error } = await resend.emails.send({
     from: FROM,
     to,
-    subject: "重置你的 Zero One 密码",
+    subject: "重置你的 零壹 密码",
     html: `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
         <h2 style="color: #064e3b;">重置密码</h2>
@@ -53,7 +53,7 @@ export async function sendPasswordResetEmail(to: string, name: string, token: st
         </p>
         <p style="color: #64748b; font-size: 14px;">链接 1 小时内有效。若未请求重置请忽略此邮件。</p>
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 24px 0;" />
-        <p style="color: #94a3b8; font-size: 12px;">Zero One · 用 AI 帮助普通人成长</p>
+        <p style="color: #94a3b8; font-size: 12px;">零壹 · 用 AI 帮助普通人成长</p>
       </div>
     `,
   });

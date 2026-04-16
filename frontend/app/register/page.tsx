@@ -73,14 +73,14 @@ export default function RegisterPage() {
           <div className="flex shrink-0 items-center justify-center rounded-xl border border-gray-200/90 shadow-sm">
             <Image
               src="/images/logo.jpg"
-              alt="Zero One"
+              alt="零壹"
               width={42}
               height={42}
               className="rounded-lg"
             />
           </div>
           <h2 className="text-xl font-bold tracking-tight">
-            Zero One
+            零壹
           </h2>
         </Link>
         <Link
@@ -94,7 +94,7 @@ export default function RegisterPage() {
       <main className="flex flex-1 flex-col items-center justify-center px-6 py-12">
         <div className="w-full max-w-md">
           <h1 className="mb-2 text-2xl font-bold tracking-tight text-slate-900">
-            注册 Zero One
+            注册 零壹
           </h1>
           <p className="mb-8 text-slate-600">
             加入我们，用 AI 帮助自己成长

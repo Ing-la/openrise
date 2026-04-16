@@ -21,7 +21,7 @@ export async function generateMetadata({
     where: { id, userId: session.user.id },
   });
   return {
-    title: course ? `${course.title} | Zero One` : "课程",
+    title: course ? `${course.title} | 零壹` : "课程",
   };
 }
 
@@ -60,14 +60,14 @@ export default async function CourseDetailPage({
             <div className="flex shrink-0 items-center justify-center rounded-xl border border-gray-200/90 shadow-sm">
               <Image
                 src="/images/logo.jpg"
-                alt="Zero One"
+                alt="零壹"
                 width={42}
                 height={42}
                 className="rounded-lg"
               />
             </div>
             <h2 className="text-xl font-bold tracking-tight">
-              Zero One
+              零壹
             </h2>
           </Link>
           <Link

@@ -106,7 +106,7 @@ export default async function Home() {
         <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6">
           <div className="flex items-center gap-3">
             <Logo size={42} variant="header" />
-            <span className="text-xl font-bold tracking-tight">Zero One</span>
+            <span className="text-xl font-bold tracking-tight">零壹</span>
           </div>
           <nav className="hidden md:flex items-center gap-10">
             <Link
@@ -406,7 +406,7 @@ export default async function Home() {
           <div className="flex items-center gap-3">
             <Logo size={36} />
             <span className="text-lg font-bold tracking-tight text-slate-700">
-              Zero One
+              零壹
             </span>
           </div>
           <div className="flex gap-8 text-sm text-slate-500">
@@ -457,7 +457,7 @@ export default async function Home() {
           </div>
         </div>
         <div className="mx-auto mt-8 max-w-7xl text-center text-xs text-slate-500">
-          © 2024 Zero One. 用 AI 帮助普通人成长。
+          © 2024 零壹. 用 AI 帮助普通人成长。
         </div>
       </footer>
     </div>

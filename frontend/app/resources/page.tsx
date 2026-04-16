@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import ComingSoon from "@/components/ComingSoon";
 
 export const metadata: Metadata = {
-  title: "资源 | Zero One",
+  title: "资源 | 零壹",
   description:
-    "Zero One 资源中心。指南、教程和工具，助力你的 AI 应用学习之旅。",
+    "零壹 资源中心。指南、教程和工具，助力你的 AI 应用学习之旅。",
 };
 
 export default function ResourcesPage() {

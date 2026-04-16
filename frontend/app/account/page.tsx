@@ -9,8 +9,8 @@ import CreateCourseForm from "./CreateCourseForm";
 import EditProfileForm from "./EditProfileForm";
 
 export const metadata: Metadata = {
-  title: "个人中心 | Zero One",
-  description: "管理你的 Zero One 课程与内容",
+  title: "个人中心 | 零壹",
+  description: "管理你的 零壹 课程与内容",
 };
 
 export default async function AccountPage() {
@@ -42,14 +42,14 @@ export default async function AccountPage() {
             <div className="flex shrink-0 items-center justify-center rounded-xl border border-gray-200/90 shadow-sm">
               <Image
                 src="/images/logo.jpg"
-                alt="Zero One"
+                alt="零壹"
                 width={42}
                 height={42}
                 className="rounded-lg"
               />
             </div>
             <h2 className="text-xl font-bold tracking-tight">
-              Zero One
+              零壹
             </h2>
           </Link>
           <div className="flex items-center gap-4">
